@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-script minSpecVersion="1.000000">
     <title>__PRODUCT__</title>
-    <background mime-type="image/png" file="banner.png" scaling="proportional"/>
-    <background-darkAqua mime-type="image/png" file="banner.png" scaling="proportional"/>
+    <background mime-type="image/png" file="banner.png" scaling="none"/>
+    <background-darkAqua mime-type="image/png" file="banner.png" scaling="none"/>
     <welcome file="welcome.html" mime-type="text/html" />
     <conclusion file="conclusion.html" mime-type="text/html" />
     <license file="LICENSE.txt"/>
@@ -17,9 +17,9 @@ function installCheck() {
         my.result.type = 'Fatal';
         return false;
     }
-    if(system.files.fileExistsAtPath('/Library/__PRODUCT__/__VERSION__/')) {
+    if(system.files.fileExistsAtPath('/Applications/__PRODUCT__/')) {
         my.result.title = 'Previous Installation Detected';
-        my.result.message = 'A previous installation of __PRODUCT__ exists at /Library/__PRODUCT__/__VERSION__/. This installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
+        my.result.message = 'A previous installation of __PRODUCT__ exists at /Applications/__PRODUCT__/. This installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
         my.result.type = 'Warning';
         return false;
     }

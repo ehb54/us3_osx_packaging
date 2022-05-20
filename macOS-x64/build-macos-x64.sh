@@ -117,9 +117,12 @@ copyBuildDirectory() {
     mkdir -p "${TARGET_DIRECTORY}/darwinpkg"
 
     #Copy cellery product to /Library/Cellery
-    mkdir -p "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
-    cp -a "$SCRIPTPATH"/application/. "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
-    chmod -R 755 "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
+    #mkdir -p "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
+    #cp -a "$SCRIPTPATH"/application/. "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
+    #chmod -R 755 "${TARGET_DIRECTORY}"/darwinpkg/Library/${PRODUCT}/${VERSION}
+
+    mkdir -p "${TARGET_DIRECTORY}"/darwinpkg/Applications
+    cp -a "$SCRIPTPATH"/application/. "${TARGET_DIRECTORY}"/darwinpkg/Applications/${PRODUCT}
 
     rm -rf "${TARGET_DIRECTORY}/package"
     mkdir -p "${TARGET_DIRECTORY}/package"
@@ -175,20 +178,20 @@ function createInstaller() {
 }
 
 function createUninstaller(){
-    cp "$SCRIPTPATH/darwin/Resources/uninstall.sh" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}"
-    sed -i '' -e "s/__VERSION__/${VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}/uninstall.sh"
-    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}/uninstall.sh"
+    cp "$SCRIPTPATH/darwin/Resources/uninstall.sh" "${TARGET_DIRECTORY}/darwinpkg/Application/${PRODUCT}"
+    sed -i '' -e "s/__VERSION__/${VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Application/${PRODUCT}/uninstall.sh"
+    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g" "${TARGET_DIRECTORY}/darwinpkg/Application/${PRODUCT}/uninstall.sh"
 }
 
 #Pre-requisites
-command -v mvn -v >/dev/null 2>&1 || {
-    log_warn "Apache Maven was not found. Please install Maven first."
-    # exit 1
-}
-command -v ballerina >/dev/null 2>&1 || {
-    log_warn "Ballerina was not found. Please install ballerina first."
-    # exit 1
-}
+# command -v mvn -v >/dev/null 2>&1 || {
+#     log_warn "Apache Maven was not found. Please install Maven first."
+#     # exit 1
+# }
+# command -v ballerina >/dev/null 2>&1 || {
+#     log_warn "Ballerina was not found. Please install ballerina first."
+#    # exit 1
+#}
 
 #Main script
 log_info "Installer generating process started."
