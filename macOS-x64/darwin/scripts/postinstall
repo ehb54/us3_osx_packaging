@@ -4,7 +4,7 @@
 #APPLICATION_FILE_PATH=bin/wso2server.sh
 
 #Parameters
-PRODUCT_HOME=/Library/__PRODUCT__/__VERSION__
+PRODUCT_HOME=/Applications/__PRODUCT__
 
 echo "Post installation process started"
 

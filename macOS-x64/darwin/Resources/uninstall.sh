@@ -43,30 +43,30 @@ PRODUCT=__PRODUCT__
 
 echo "Application uninstalling process started"
 # remove link to shorcut file
-find "/usr/local/bin/" -name "__PRODUCT__-__VERSION__" | xargs rm
-if [ $? -eq 0 ]
-then
-  echo "[1/3] [DONE] Successfully deleted shortcut links"
-else
-  echo "[1/3] [ERROR] Could not delete shortcut links" >&2
-fi
+## find "/usr/local/bin/" -name "__PRODUCT__-__VERSION__" | xargs rm
+## if [ $? -eq 0 ]
+## then
+##   echo "[1/3] [DONE] Successfully deleted shortcut links"
+## else
+##   echo "[1/3] [ERROR] Could not delete shortcut links" >&2
+## fi
 
 #forget from pkgutil
 pkgutil --forget "org.$PRODUCT.$VERSION" > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo "[2/3] [DONE] Successfully deleted application informations"
+  echo "[1/2] [DONE] Successfully deleted application informations"
 else
-  echo "[2/3] [ERROR] Could not delete application informations" >&2
+  echo "[1/2] [ERROR] Could not delete application informations" >&2
 fi
 
 #remove application source distribution
-[ -e "/Library/${PRODUCT}/${VERSION}" ] && rm -rf "/Library/${PRODUCT}/${VERSION}"
+[ -e "/Applications/${PRODUCT}" ] && rm -rf "/Applications/${PRODUCT}"
 if [ $? -eq 0 ]
 then
-  echo "[3/3] [DONE] Successfully deleted application"
+  echo "[2/2] [DONE] Successfully deleted application"
 else
-  echo "[3/3] [ERROR] Could not delete application" >&2
+  echo "[2/2] [ERROR] Could not delete application" >&2
 fi
 
 echo "Application uninstall process finished"
