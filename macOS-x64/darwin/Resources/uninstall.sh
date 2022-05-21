@@ -55,18 +55,28 @@ echo "Application uninstalling process started"
 pkgutil --forget "org.$PRODUCT.$VERSION" > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo "[1/2] [DONE] Successfully deleted application informations"
+  echo "[1/3] [DONE] Successfully deleted application informations"
 else
-  echo "[1/2] [ERROR] Could not delete application informations" >&2
+  echo "[1/3] [ERROR] Could not delete application informations" >&2
+fi
+
+#remove /Library/LaunchDaemon/ultrascan_sysctl.plist
+[ -e "/Library/LaunchDaemons/ultrascan_sysctl.plist" ] && launchctl unload /Library/LaunchDaemons/ultrascan_sysctl.plist
+[ -e "/Library/LaunchDaemons/ultrascan_sysctl.plist" ] && rm -f /Library/LaunchDaemons/ultrascan_sysctl.plist
+if [ $? -eq 0 ]
+then
+  echo "[2/3] [DONE] Successfully removed sysv shared memory plist"
+else
+  echo "[2/3] [ERROR] Could not remove sysv shared memory plist application" >&2
 fi
 
 #remove application source distribution
 [ -e "/Applications/${PRODUCT}" ] && rm -rf "/Applications/${PRODUCT}"
 if [ $? -eq 0 ]
 then
-  echo "[2/2] [DONE] Successfully deleted application"
+  echo "[3/3] [DONE] Successfully deleted application"
 else
-  echo "[2/2] [ERROR] Could not delete application" >&2
+  echo "[3/3] [ERROR] Could not delete application" >&2
 fi
 
 echo "Application uninstall process finished"
