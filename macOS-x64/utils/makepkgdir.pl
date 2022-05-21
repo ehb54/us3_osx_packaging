@@ -33,7 +33,7 @@ die "bad directory $tdir must contain '$reqformat'\n" if $tdir !~ /$reqformat/;
 
 @postcmds = (
 ## some bug in package builder... this seems to fix it
-    "cd $tdir/bin && cp -r us.app us3.app"
+## not since I added assistant?    "cd $tdir/bin && cp -r us.app us3.app"
     );
 
 ## step 1 check sanity
