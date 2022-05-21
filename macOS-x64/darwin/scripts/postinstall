@@ -17,4 +17,30 @@ chmod -R 755 .
 #Add application shortcut to /usr/local/bin
 ## rm -f /usr/local/bin/__PRODUCT__-__VERSION__
 ## ln -s ${PRODUCT_HOME}/${APPLICATION_FILE_PATH} /usr/local/bin/__PRODUCT__-__VERSION__
+
+## setup shm parameters
+cat > /Library/LaunchDaemons/ultrascan_sysctl.plist <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Label</key>
+<string>ultrascan_sysctl</string>
+<key>ProgramArguments</key>
+<array>
+<string>/usr/sbin/sysctl</string>
+<string>-w</string>
+<string>kern.sysv.shmmax=1073741824</string>
+<string>kern.sysv.shmmin=1</string>
+<string>kern.sysv.shmmni=256</string>
+<string>kern.sysv.shmseg=64</string>
+<string>kern.sysv.shmall=262144</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
+</plist>
+EOF
+launchctl load /Library/LaunchDaemons/ultrascan_sysctl.plist
+
 echo "Post installation process finished"
