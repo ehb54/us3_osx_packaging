@@ -51,7 +51,9 @@ for my $framework ( @ARGV ) {
         print "$ba dep $d\n";
 
         if ( $d =~ /\.framework/ ) {
-            $cmds .= "install_name_tool -change $d \@rpath/$d $f\n";
+            my $dnew = $d;
+            $dnew =~ s/^.*\/Frameworks\///;
+            $cmds .= "install_name_tool -change $d \@rpath/$dnew $f\n";
             next;
         }
 
