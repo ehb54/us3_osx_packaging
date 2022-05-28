@@ -1,9 +1,11 @@
 #!/usr/bin/perl
 
-$notes = "usage: $0 list
+$notes = "usage: $0 (list|update)
 
 finds all libs of everything in bin, Frameworks, lib
 and lists
+
+update will copy needd libraries if found
 
 ";
 
@@ -40,10 +42,15 @@ use File::Basename;
 
 ## get frameworks
 
+### die if frameworks have Headers
+{
+    my @fheaders = `find Frameworks -type d -name Headers`;
+    die "ERROR: Frameworks have Headers, remove before continuing\n" if @fheaders;
+}
+
 @frames = `find Frameworks -type f`;
 @frames = grep !/\.(prl|plist)\s*$/, @frames;
 @frames = grep !/Versions/, @frames;
-
 
 push @all, @apps, @libs, @frames;
 
@@ -52,7 +59,19 @@ push @all, @apps, @libs, @frames;
 grep chomp, @all;
 
 for $f ( @all ) {
-    my @deps = `otool -L $f | sed 1,2d | awk '{ print \$1 }'`;
+    ## check first for 'fatal error'
+    `otool -L $f 2>/dev/null`;
+    if ( $? ) {
+        $otoolerrors{ $f }++;
+        next;
+    }
+
+    ## dylibs & frameworks 2nd otool -L line is self-reference, apparently can be ignored
+    ### if not then special handling install_name_tool -id will be needed instead of -change
+
+    my $deletelines = $f =~ /(dylib$|\.framework)/ ? "1,2d" : "1d";
+    my @deps = `otool -L $f | sed $deletelines | awk '{ print \$1 }'`;
+
     grep chomp, @deps;
 
     ## catagorize & store deps
@@ -62,7 +81,7 @@ for $f ( @all ) {
             next;
         }
 
-        if ( $d =~ /^\@executable_path\// ) {
+        if ( $d =~ /\@executable_path\// ) {
             my $checkfile = $d;
             $checkfile =~ s/^\@executable_path\/(\.\.\/)*//;
             if ( $checkfile =~ /\.framework/ ) {
@@ -72,6 +91,7 @@ for $f ( @all ) {
             }
             $tochecks{ $checkfile }++;
             $exepaths{ $d }++;
+            $useexecs{ $d } .= $useexecs{ $d } ? " $f" : $f;
             next;
         }
         if ( $d =~ /^\@rpath\// ) {
@@ -115,13 +135,35 @@ for $f ( @all ) {
         $todos{ $d } .= $todos{ $d } ? " $f" : $f;
     }
 }
-    
+
+## extra checks
+
+@extras = (
+    "bin/Assistant.app"
+    ,"bin/us3_somo.app"
+    ,"bin/rasmol"
+    );
+
+for $f ( @extras ) {
+    if ( !-e $f ) {
+        $missing{ $f }++;
+        $errorsum .= "ERROR: $f is missing\n";
+    }
+}
+
+### being reports
+
+
 print hdrline( "syslibs" );
 print join "\n", sort { $a cmp $b } keys %syslibs;
 print "\n" if keys %syslibs;
 
 print hdrline( "exepaths" );
-print join "\n", sort { $a cmp $b } keys %exepaths;
+# print join "\n", sort { $a cmp $b } keys %exepaths;
+for $d ( sort { $a cmp $b } keys %useexecs ) {
+    print "$d\n    " . $useexecs{$d} . "\n";
+}    
+
 print "\n" if keys %exepaths;
 
 print hdrline( "rpaths" );
@@ -140,6 +182,12 @@ print hdrline( "todos" );
 for $d ( sort { $a cmp $b } keys %todos ) {
     print "$d\n    " . $todos{$d} . "\n";
 }    
+$errorsum .= "WARNING: todos present, must be fixed before packaging\n" if keys %todos;
+
+print hdrline( "missing" );
+print join "\n", sort { $a cmp $b } keys %missing;
+print "\n" if keys %missing;
+
 
 ### checks
 print hdrline( "checking existence of libraries" );
@@ -151,15 +199,30 @@ for $d ( sort { $a cmp $b } keys %tochecks ) {
     if ( -e $d ) {
         print "ok: $d\n";
     } else {
-        print "ERROR MISSING LIB: $d - ";
+        my $err = "ERROR: missing lib: $d - ";
         if ( $copyfrom{ $d } ) {
-            print "copy from " .  $copyfrom{ $d };
+            $err .= "copy from " .  $copyfrom{ $d };
             $cmds .= "cp " . $copyfrom{ $d } . " $d\n";
         } else {
-            print "unknown source";
+            $err .= "unknown source";
         }
-        print "\n";
+        print "$err\n";
+        $errorsum .= "$err\n";
     }
+}
+
+### otool errors
+print hdrline( "otoolerrors" );
+for $d ( sort { $a cmp $b } keys %otoolerrors ) {
+    my $err = "ERROR: otool -L returned an error attempting to list libraries on $d";
+    $errorsum .= "$err\n";
+    print "$err\n";
+}    
+
+
+if ( $errorsum ) {
+    print hdrline( "error summary" );
+    print $errorsum;
 }
 
 print hdrline( "cmds" );
@@ -167,9 +230,5 @@ print $cmds;
 
 if ( $cmds && $update ) {
     print `$cmds`;
-    print "WARNING: rerun until no cmds left\n";
+    print "WARNING: rerun until no cmds nor ERRORs left\n";
 }
-
-
-
-
