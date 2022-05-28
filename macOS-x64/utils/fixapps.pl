@@ -27,8 +27,11 @@ for my $a ( @ARGV ) {
 
     ## symlinks
 
+    die "Error: $a/Contents/Frameworks is a directory\n" if -e "$a/Contents/Frameworks" && !-l "$a/Contents/Frameworks";
+    die "Error: $a/Contents/platforms is a directory\n" if -e "$a/Contents/MacOS/platforms" && !-l "$a/Contents/MacOS/platforms";
+
     $cmds .= "ln -sf ../../../Frameworks $a/Contents/\n";
-    $cmds .= "ln -sf ../../../../platforms $a/Contents/MacOS/\n";
+    $cmds .= "ln -sf ../../../../plugins/platforms $a/Contents/MacOS/platforms\n";
         
     ## otool analysis
 
@@ -36,7 +39,7 @@ for my $a ( @ARGV ) {
     $f =~ s/\.app$//;
     die "$f does not exist\n" if !-e $f;
     
-    my @deps = `otool -L $f | sed 1,2d | awk '{ print \$1 }'`;
+    my @deps = `otool -L $f | sed 1d | awk '{ print \$1 }'`;
     grep chomp, @deps; 
 
     for ( my $i = 0; $i < @deps; ++$i ) {
@@ -53,10 +56,12 @@ for my $a ( @ARGV ) {
             next;
         }
 
-        print "$ba dep $d\n";
+        print "$ba dep $d $duse\n";
 
         if ( $d =~ /\.framework/ ) {
-            $cmds .= "install_name_tool -change $d \@rpath/$d $f\n";
+            my $dnew = $d;
+            $dnew =~ s/^.*\/Frameworks\///;
+            $cmds .= "install_name_tool -change $d \@rpath/$dnew $f\n";
             next;
         }
 
