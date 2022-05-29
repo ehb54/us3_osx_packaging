@@ -142,6 +142,7 @@ for $f ( @all ) {
     "bin/Assistant.app"
     ,"bin/us3_somo.app"
     ,"bin/rasmol"
+    ,"bin/manual.qch"
     );
 
 for $f ( @extras ) {
