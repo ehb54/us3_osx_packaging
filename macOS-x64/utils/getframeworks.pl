@@ -78,5 +78,7 @@ for $f ( @frameworks ) {
     $cmds .= "rsync -av --exclude Headers $f $tdir\n";
 }
 
+$cmds .= "rsync -av $qtdir/plugins .";
+
 print $cmds;
 print `$cmds`;

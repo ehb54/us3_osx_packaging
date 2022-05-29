@@ -143,6 +143,8 @@ for $f ( @all ) {
     ,"bin/us3_somo.app"
     ,"bin/rasmol"
     ,"bin/manual.qch"
+    ,"Frameworks"
+    ,"plugins"
     );
 
 for $f ( @extras ) {
