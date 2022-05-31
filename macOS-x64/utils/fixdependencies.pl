@@ -105,7 +105,6 @@ for $f ( @all ) {
             
             $tochecks{ $checkfile }++;
             $rpaths{ $d }++;
-            die "$d $f\n" if $d =~ /^\@rpath\/libmy/;
 
             next;
         }
