@@ -57,7 +57,7 @@ for my $framework ( @ARGV ) {
             next;
         }
 
-        if ( $d =~ /^(\/opt|lib|\/usr\/local)/ ) {
+        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/Users)/ ) {
             my $bd = basename( $d );
             $cmds .= "install_name_tool -change $d \@rpath/lib/$bd $f\n";
             next;

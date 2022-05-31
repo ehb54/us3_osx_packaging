@@ -52,7 +52,7 @@ for my $a ( @ARGV ) {
         if ( $d =~ /^\/usr\/lib\// ) {
             next;
         }
-        if ( $d =~ /^\@rpath\/(Qt|qwt\.|lib)/ ) {
+        if ( $d =~ /^\@rpath\/(Qt|qwt\.|lib\/)/ ) {
             next;
         }
 
@@ -65,7 +65,7 @@ for my $a ( @ARGV ) {
             next;
         }
 
-        if ( $d =~ /^(\/opt|lib|\/usr\/local)/ ) {
+        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/Users|\@rpath\/lib)/ ) {
             my $bd = basename( $d );
             $cmds .= "install_name_tool -change $d \@rpath/lib/$bd $f\n";
             next;
