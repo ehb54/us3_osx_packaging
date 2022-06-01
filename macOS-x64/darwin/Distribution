@@ -11,15 +11,23 @@
     <installation-check script="installCheck();"/>
     <script>
 function installCheck() {
-    if(!(system.compareVersions(system.version.ProductVersion, '12.0.1') >= 0)) {
+    if(!(system.compareVersions(system.version.ProductVersion, '11.0') >= 0)) {
         my.result.title = 'Unable to install';
-        my.result.message = '__PRODUCT__ requires Mac OS X 12.0 or later.';
+        my.result.message = '__PRODUCT__ requires Mac OS X 11.0 or later.';
         my.result.type = 'Fatal';
         return false;
     }
     if( system.sysctl("hw.optional.arm64") == 0 ) {
         my.result.title = 'Unable to install';
         my.result.message = 'This version of __PRODUCT__ requires Apple Silicon (M1) hardware.';
+        my.result.type = 'Fatal';
+        return false;
+    }
+    if( !system.files.fileExistsAtPath("/usr/X11/lib/libX11.6.dylib") ||
+        !system.files.fileExistsAtPath("/usr/X11/lib/libXext.6.dylib") ||
+        !system.files.fileExistsAtPath("/usr/X11/lib/libXi.6.dylib") ) {
+        my.result.title = 'Unable to install - XQuartz must be installed first';
+        my.result.message = 'You must install XQuartz before proceeding. The XQuartz package can be downloaded from https://xquartz.org';
         my.result.type = 'Fatal';
         return false;
     }
