@@ -27,6 +27,7 @@ if ( !-d $tdir ) {
     ,"$qtdir/lib/QtConcurrent.framework"
     ,"$qtdir/lib/QtCore.framework"
     ,"$qtdir/lib/QtDBus.framework"
+    ,"$qtdir/lib/QtDataVisualization.framework"
     ,"$qtdir/lib/QtGamepad.framework"
     ,"$qtdir/lib/QtGui.framework"
     ,"$qtdir/lib/QtHelp.framework"
