@@ -26,6 +26,14 @@ sub hdrline {
 
 use File::Basename;
 
+## exclude XQuartz software for lib check errors
+@xquartz =
+    (
+     "bin/rasmol"
+    );
+
+%xquartzmap = map { $_ => 1 } @xquartz;
+
 ## get apps
 
 @apps = `find bin -type f`;
@@ -113,6 +121,11 @@ for $f ( @all ) {
             next;
         }
 
+        if ( $xquartzmap{ $f } ) {
+            $xquartzexcludes{ "$f : $d" }++;
+            next;
+        }
+
         if ( $d =~ /\/.framework/ ) {
             my $checkfile = basename( $d );
             $checkfile = "Frameworks/$checkfile";
@@ -133,6 +146,7 @@ for $f ( @all ) {
         }            
 
         $todos{ $d } .= $todos{ $d } ? " $f" : $f;
+
     }
 }
 
@@ -180,6 +194,10 @@ print "\n";
 print hdrline( "ignores" );
 print join "\n", sort { $a cmp $b } keys %ignores;
 print "\n" if keys %ignores;
+
+print hdrline( "xquartz excludes" );
+print join "\n", sort { $a cmp $b } keys %xquartzexcludes;
+print "\n" if keys %xquartzexcludes;
 
 print hdrline( "todos" );
 for $d ( sort { $a cmp $b } keys %todos ) {
