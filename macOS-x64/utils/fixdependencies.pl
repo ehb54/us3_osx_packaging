@@ -26,6 +26,11 @@ sub hdrline {
 
 use File::Basename;
 
+my $scriptpath = dirname(__FILE__);
+$minosprog = "$scriptpath/minlibversion.pl";
+die "$minosprog missing\n" if !-e $minosprog;
+die "$minosprog not executable\n" if !-x $minosprog;
+
 ## exclude XQuartz software for lib check errors
 @xquartz =
     (
@@ -41,7 +46,7 @@ use File::Basename;
 ## prune apps
 
 @apps = grep !/\.(lproj|plist)\s*$/, @apps;
-@apps = grep !/PkgInfo$/, @apps;
+@apps = grep !/(PkgInfo|icns|\.DS_Store)$/, @apps;
 @apps = grep !/(win64|linux64|manual\.q)/, @apps;
 
 ## get libs
@@ -72,6 +77,16 @@ for $f ( @all ) {
     if ( $? ) {
         $otoolerrors{ $f }++;
         next;
+    }
+
+    ## check minos version
+
+    {
+        my $vers = `$minosprog $f | awk '{ print \$3 }'`;
+        chomp $vers;
+        $minos_versions  { $f } = $vers;
+        $minos_count     { $vers }++;
+        $minos_usedby    { $vers } .= "$f ";
     }
 
     ## dylibs & frameworks 2nd otool -L line is self-reference, apparently can be ignored
@@ -146,7 +161,6 @@ for $f ( @all ) {
         }            
 
         $todos{ $d } .= $todos{ $d } ? " $f" : $f;
-
     }
 }
 
@@ -168,8 +182,15 @@ for $f ( @extras ) {
     }
 }
 
-### being reports
+## check os versions
+if ( keys %minos_count > 1 ) {
+    $warnings .= "multiple minimum versions found " . ( join ' ', sort { $a <=> $b } keys %minos_count ) . "\n";
+    for my $v ( keys %minos_usedby ) {
+        $warnings .= " version $v - counts $minos_count{$v}\n\t$minos_usedby{$v}\n";
+    }
+}
 
+### begin reports
 
 print hdrline( "syslibs" );
 print join "\n", sort { $a cmp $b } keys %syslibs;
@@ -198,6 +219,12 @@ print "\n" if keys %ignores;
 print hdrline( "xquartz excludes" );
 print join "\n", sort { $a cmp $b } keys %xquartzexcludes;
 print "\n" if keys %xquartzexcludes;
+
+print hdrline( "minimum os version counts" );
+for $d ( sort { $a cmp $b } keys %minos_count ) {
+    print "$d : " . $minos_count{$d} . "\n";
+}
+print "\n" if keys %minos_count;
 
 print hdrline( "todos" );
 for $d ( sort { $a cmp $b } keys %todos ) {
@@ -240,6 +267,11 @@ for $d ( sort { $a cmp $b } keys %otoolerrors ) {
     print "$err\n";
 }    
 
+
+if ( $warnings ) {
+    print hdrline( "warnings" );
+    print $warnings;
+}
 
 if ( $errorsum ) {
     print hdrline( "error summary" );
