@@ -26,10 +26,12 @@ sub hdrline {
 
 use File::Basename;
 
-my $scriptpath = dirname(__FILE__);
+$scriptpath = dirname(__FILE__);
 $minosprog = "$scriptpath/minlibversion.pl";
 die "$minosprog missing\n" if !-e $minosprog;
 die "$minosprog not executable\n" if !-x $minosprog;
+
+$installerpath = `cd $scriptpath && pwd -P | perl -pe 's/\\/[^\\/]+\$//'`;
 
 ## exclude XQuartz software for lib check errors
 @xquartz =
@@ -185,9 +187,20 @@ for $f ( @extras ) {
 ## check os versions
 if ( keys %minos_count > 1 ) {
     $warnings .= "multiple minimum versions found " . ( join ' ', sort { $a <=> $b } keys %minos_count ) . "\n";
+    my $count;
     for my $v ( keys %minos_usedby ) {
+        $count += $minos_count{$v};
         $warnings .= " version $v - counts $minos_count{$v}\n\t$minos_usedby{$v}\n";
     }
+    $warnings .= "total programs found $count\n";
+}
+
+$revfile = "programs/us/us_revision.h";
+if ( !-e $revfile ) {
+    $errorsum .= "ERROR: revision file $revfile is missing\n";
+} else {
+    $rev = `awk -F\\" '{ print \$2 }' $revfile`;
+    chomp $rev;
 }
 
 ### begin reports
@@ -278,6 +291,13 @@ if ( $errorsum ) {
     print $errorsum;
 }
 
+if ( $rev && !keys %todos && !$errorsum && !$cmds ) {
+    print hdrline( "build package commands" );
+    my $cmd = "$scriptpath/makepkgdir.pl $installerpath/application
+(cd $installerpath && yes n | ./build-macos-x64.sh UltraScan3 4.0.$rev && cp target/pkg/UltraScan3-macos-installer-x64-4.0.$rev.pkg ~/Downloads/UltraScan3-macos-installer-`uname -m`-4.0.$rev.pkg)";
+    print "$cmd\n";
+}
+
 print hdrline( "cmds" );
 print $cmds;
 
@@ -285,3 +305,4 @@ if ( $cmds && $update ) {
     print `$cmds`;
     print "WARNING: rerun until no cmds nor ERRORs left\n";
 }
+
