@@ -86,7 +86,7 @@ if ( $opts{brew}{set} || $opts{all}{set} ) {
     if ( !run_cmd_last_error() ) {
         print "brew already apparently installed\n";
     } else {
-        my $cmd = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)';
+        my $cmd = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
         my $res = run_cmd( $cmd, true );
         error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
     }
