@@ -37,16 +37,16 @@ $us_mods      = "$scriptdir/../mods/win10-mingw64-templates";
 require "$scriptdir/utility.pm";
 
 initopts(
-    "all",        "",          "setup everything except --sshd, --us & --us_update", 0
-    ,"brew",      "",          "install brew", 0
-    ,"packages",  "",          "install brew packages", 0
-    ,"git",       "repo",      "use specified repo instead of default $us_git", 1
-    ,"qt",        "",          "download and build qt", 0
-    ,"qwt",       "",          "download and build qwt", 0
-    ,"us",        "branch",    "branch download and setup ultrascan", 1
-    ,"us_update", "branch",    "update existing branch,", 1
-    ,"procs",     "n",         "set number of processors (default $nprocs)", 1
-    ,"help",      "",          "print help", 0
+    "all",            "",          "setup everything except --sshd, --us & --us_update", 0
+    ,"brew",          "",          "install brew", 0
+    ,"brewpackages",  "",          "install brew packages", 0
+    ,"git",           "repo",      "use specified repo instead of default $us_git", 1
+    ,"qt",            "",          "download and build qt", 0
+    ,"qwt",           "",          "download and build qwt", 0
+    ,"us",            "branch",    "branch download and setup ultrascan", 1
+    ,"us_update",     "branch",    "update existing branch,", 1
+    ,"procs",         "n",         "set number of processors (default $nprocs)", 1
+    ,"help",          "",          "print help", 0
     );
 
 $notes = "usage: $0 options
@@ -77,6 +77,7 @@ if ( $opts{procs}{set} ) {
     ,"postgresql"
     ,"nodejs"
     ,"cmake"
+    ,"xcodesorg/made/xcodes"
     );
 
 ## setup $src_dir
@@ -86,6 +87,9 @@ die "$src_dir does not exist as a directory\n" if !-d $src_dir;
 
 # install brew
 if ( $opts{brew}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "install brew\n";
+    print line('=');
     my $cmd = 'which brew';
     my $res = run_cmd( $cmd, true );
     if ( !run_cmd_last_error() ) {
@@ -98,10 +102,10 @@ if ( $opts{brew}{set} || $opts{all}{set} ) {
     }
 }
 
-# install pkgs
-if ( $opts{packages}{set} || $opts{all}{set} ) {
+# install brewpackages
+if ( $opts{brewpackages}{set} || $opts{all}{set} ) {
     print line('=');
-    print "processing brew\n";
+    print "install brew packages\n";
     print line('=');
     
     for my $p ( @pkgs ) {
