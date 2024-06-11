@@ -72,6 +72,11 @@ if ( $opts{procs}{set} ) {
 
 @pkgs = (
     "emacs"
+    ,"htop"
+    ,"wget"
+    ,"postgresql"
+    ,"nodejs"
+    ,"cmake"
     );
 
 ## setup $src_dir
