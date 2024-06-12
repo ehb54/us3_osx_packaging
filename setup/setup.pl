@@ -25,10 +25,12 @@ $arch = `uname -m`;
 chomp $arch;
 if ( $arch eq "arm64" ) {
     # apple silicon
-    $minosx           = "11.0";
+    $minosx                     = "11.0";
+    $postgress_install_location = '/opt/homebrew/opt/postgresql@14';
 } else {
     # intel
-    $minosx           = "10.13";
+    $minosx                     = "10.13";
+    $postgress_install_location = '/usr/local/opt/postgresql@14';
 }
 
 $xcode_version        = "12.5.1";
@@ -39,6 +41,11 @@ $openssl_release      = "1.1.1w";
 $openssl_dir          = "openssl-$openssl_release";
 $openssl_url          = "https://www.openssl.org/source/old/1.1.1/$openssl_dir.tar.gz";
 
+$mysql_version        = "8.0.37";
+$mysql_release        = "mysql-boost-$mysql_version";
+$mysql_dir            = "mysql-$mysql_version";
+$mysql_url            = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysql_version.zip";
+ 
 $qt_version           = "$qt_major_version.$qt_minor_version";
 $qtfile               = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
 $qtsrcname            = "qt-everywhere-src-$qt_version";
@@ -62,6 +69,7 @@ initopts(
     ,"xcode",         "",          "download xcode version $xcode_version (will require APPLE ID", 0
     ,"zstd",          "",          "build zstd-$zstd_release from source", 0
     ,"openssl",       "",          "build openssl-$openssl_release from source", 0
+    ,"mysql",         "",          "build $mysql_release from source", 0
     ,"git",           "repo",      "use specified repo instead of default $us_git", 1
     ,"qt",            "",          "download and build qt", 0
     ,"qwt",           "",          "download and build qwt", 0
@@ -192,6 +200,25 @@ if ( $opts{openssl}{set} || $opts{all}{set} ) {
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
 
+# install mysql
+if ( $opts{mysql}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "build mysql \n";
+    print line('=');
+    my $cmd = 
+        "cd $src_dir"
+        . " && wget -O $mysql_dir.tar.gz $mysql_url"
+        . " && tar xf $mysql_dir.tar.gz"
+        . " && rm $mysql_dir.tar.gz"
+        . " && cd $mysql_dir"
+        . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
+        . " && make -j $nprocs"
+        . " && make install"
+        ;
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
 if ( $opts{qt}{set} || $opts{all}{set} ) {
     print line('=');
     print "processing qt\n";
@@ -225,25 +252,15 @@ if ( $opts{qt}{set} || $opts{all}{set} ) {
     mkdir $qtshadow;
     die "could not create directory $qtshadow\n" if !-d $qtshadow;
 
-    ## remove d3d12 because https://aur.archlinux.org/cgit/aur.git/tree/0003-Disable-d3d12-requiring-fxc.exe.patch?h=mingw-w64-qt5-declarative
-
-    $cmd = "sed -i 's/^qtConfig\(d3d12/# qtConfig\(d3d12/' $qtsrcdir/qtdeclarative/src/plugins/scenegraph/scenegraph.pro";
-    run_cmd( $cmd );
-
-    ## remove wmf / compile error issue 
-    $cmd = "sed -i 's/^\\s*qtConfig(wmf/# qtConfig(wmf/' $qtsrcdir/qtmultimedia/src/plugins/plugins.pro";
-    run_cmd( $cmd );
-
     ## configure qt
 
-    $cmd = "cd $qtshadow && MAKEFLAGS=-j$nprocs ../configure -prefix $qtinstalldir -release -opensource -confirm-license -nomake tests -nomake examples -system-proxies -D QT_SHAREDMEMORY -D QT_SYSTEMSEMAPHORE -no-icu -platform win32-g++ -plugin-sql-mysql MYSQL_INCDIR=/mingw64/include/mariadb MYSQL_LIBDIR=/mingw64/lib -openssl-linked -opengl desktop -plugin-sql-psql PSQL_LIBDIR=/mingw64/lib PSQL_INCDIR=/mingw64/include/postgresql > ../last_configure.stdout 2> ../last_configure.stderr";
+    $cmd = "cd $qtshadow && export MAKEFLAGS=-j$nprocs && ../configure -prefix $src_dir/qt-$qt_major_version.$qt_minor_version -release -opensource -confirm-license -nomake tests -nomake examples -plugin-sql-mysql -plugin-sql-psql -openssl-linked -system-proxies -D QT_SHAREDMEMORY -D QT_SYSTEMSEMAPHORE -no-icu OPENSSL_PREFIX=$src_dir/openssl MYSQL_INCDIR=$src_dir/mysql-$mysql_version/include MYSQL_PREFIX=$src_dir/mysql-$mysql_version PSQL_PREFIX=$postgresql_install_location  > ../last_configure.stdout 2> ../last_configure.stderr";
 
     print run_cmd( $cmd );
 
     ## make qt
-    # export MSYS2_ARG_CONV_EXCL='*'  only needed to build all or a specific pkg?
 
-    $cmd = "cd $qtshadow && MSYS2_ARG_CONV_EXCL='*' make -j$nprocs -k > ../build.stdout 2> ../build.stderr";
+    $cmd = "cd $qtshadow && make -j$nprocs -k > ../build.stdout 2> ../build.stderr";
     print run_cmd( $cmd, true, 3 );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 
