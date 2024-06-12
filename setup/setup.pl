@@ -46,6 +46,8 @@ $mysql_release        = "mysql-boost-$mysql_version";
 $mysql_dir            = "mysql-$mysql_version";
 $mysql_url            = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysql_version.zip";
  
+$python2_url          = "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg";
+
 $qt_version           = "$qt_major_version.$qt_minor_version";
 $qtfile               = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
 $qtsrcname            = "qt-everywhere-src-$qt_version";
@@ -70,9 +72,10 @@ initopts(
     ,"zstd",          "",          "build zstd-$zstd_release from source", 0
     ,"openssl",       "",          "build openssl-$openssl_release from source", 0
     ,"mysql",         "",          "build $mysql_release from source", 0
-    ,"git",           "repo",      "use specified repo instead of default $us_git", 1
+    ,"python2",       "",          "download and install python2, Qt seems to need it for building pdfs", 0
     ,"qt",            "",          "download and build qt", 0
     ,"qwt",           "",          "download and build qwt", 0
+    ,"git",           "repo",      "use specified repo instead of default $us_git", 1
     ,"us",            "branch",    "branch download and setup ultrascan", 1
     ,"us_update",     "branch",    "update existing branch,", 1
     ,"procs",         "n",         "set number of processors (default $nprocs)", 1
@@ -109,7 +112,10 @@ if ( $opts{procs}{set} ) {
     ,"postgresql"
     ,"nodejs"
     ,"cmake"
+    ,"aria2"
     ,"xcodesorg/made/xcodes"
+    ,"llvm"
+    ,"pkg-config"
     );
 
 ## setup $src_dir
@@ -156,9 +162,16 @@ if ( $opts{xcode}{set} || $opts{all}{set} ) {
     print line('=');
     print "install xcode $xcode_version\n";
     print line('=');
-    my $cmd = "sudo xcodes install $xcode_version";
-    my $res = run_cmd( $cmd, true );
-    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+    {
+        my $cmd = "sudo xcodes install $xcode_version";
+        my $res = run_cmd( $cmd, true );
+        error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+    }
+    {
+        my $cmd = "sudo xcodes select $xcode_version";
+        my $res = run_cmd( $cmd, true );
+        error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+    }
 }
 
 # install zstd
@@ -174,7 +187,7 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' Makefile"
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' lib/Makefile"
         . " && make -j $nprocs"
-##        . " && make install" ## had this in my notes but trying without
+        . " && make install" 
         ;
     my $res = run_cmd( $cmd, true );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
@@ -211,10 +224,25 @@ if ( $opts{mysql}{set} || $opts{all}{set} ) {
         . " && tar xf $mysql_dir.tar.gz"
         . " && rm $mysql_dir.tar.gz"
         . " && cd $mysql_dir"
-        . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
+        . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Applications/Xcode-12.5.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
         . " && make -j $nprocs"
         . " && make install"
         ;
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
+# install python2
+if ( $opts{python2}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "install python2\n";
+    print line('=');
+    my $cmd = 
+        "cd $src_dir"
+        . " && wget -O python2.pkg $python2_url"
+        . " && sudo installer -verbose -pkg python2.pkg -target /"
+        . " && rm python2.pkg"
+        ; 
     my $res = run_cmd( $cmd, true );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
