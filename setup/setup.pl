@@ -19,18 +19,19 @@ use Cwd 'abs_path';
 $scriptdir =  dirname( abs_path( __FILE__ ) );
 
 ## developer config... if these are changed, it may break some assumptions
+$xcode_version = "12.5.1";
 
-$qt_version   = "$qt_major_version.$qt_minor_version";
-$qtfile       = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
-$qtsrcname    = "qt-everywhere-src-$qt_version";
-$qtsrcdir     = "$src_dir/$qtsrcname";
-$qtshadow     = "$qtsrcdir/shadow-build";
-$qtinstalldir = "$src_dir/qt-$qt_version";
+$qt_version    = "$qt_major_version.$qt_minor_version";
+$qtfile        = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
+$qtsrcname     = "qt-everywhere-src-$qt_version";
+$qtsrcdir      = "$src_dir/$qtsrcname";
+$qtshadow      = "$qtsrcdir/shadow-build";
+$qtinstalldir  = "$src_dir/qt-$qt_version";
 
-$qwtfile      = "$src_dir/qwt-$qwt_version.tar.bz2";
-$qwtsrcdir    = "$src_dir/qt-$qt_version-qwt-$qwt_version";
+$qwtfile       = "$src_dir/qwt-$qwt_version.tar.bz2";
+$qwtsrcdir     = "$src_dir/qt-$qt_version-qwt-$qwt_version";
 
-$us_mods      = "$scriptdir/../mods/win10-mingw64-templates";
+$us_mods       = "$scriptdir/../mods/win10-mingw64-templates";
 
 ## end developer config
 
@@ -40,6 +41,7 @@ initopts(
     "all",            "",          "setup everything except --sshd, --us & --us_update", 0
     ,"brew",          "",          "install brew", 0
     ,"brewpackages",  "",          "install brew packages", 0
+    ,"xcode",         "",          "download xcode version $xcode_version (will require APPLE ID", 0
     ,"git",           "repo",      "use specified repo instead of default $us_git", 1
     ,"qt",            "",          "download and build qt", 0
     ,"qwt",           "",          "download and build qwt", 0
@@ -117,6 +119,16 @@ if ( $opts{brewpackages}{set} || $opts{all}{set} ) {
         print "$res\n";
         error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
     }
+}
+
+# install xcode
+if ( $opts{xcode}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "install xcode $xcode_version\n";
+    print line('=');
+    my $cmd = "xcodes install $xcode_version";
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
 
 if ( $opts{qt}{set} || $opts{all}{set} ) {
