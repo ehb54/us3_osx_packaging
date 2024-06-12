@@ -12,6 +12,7 @@ $us_git           = "https://github.com/ehb54/ultrascan3";
 $us_base          = $ENV{HOME};        ## base path for ultrascan downloads
 $us_prefix        = "ultrascan3";      ## directory name prefix for ultrascan clones
 
+
 ## end user configuration
 
 use File::Basename;
@@ -19,19 +20,36 @@ use Cwd 'abs_path';
 $scriptdir =  dirname( abs_path( __FILE__ ) );
 
 ## developer config... if these are changed, it may break some assumptions
-$xcode_version = "12.5.1";
 
-$qt_version    = "$qt_major_version.$qt_minor_version";
-$qtfile        = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
-$qtsrcname     = "qt-everywhere-src-$qt_version";
-$qtsrcdir      = "$src_dir/$qtsrcname";
-$qtshadow      = "$qtsrcdir/shadow-build";
-$qtinstalldir  = "$src_dir/qt-$qt_version";
+$arch = `uname -m`;
+chomp $arch;
+if ( $arch eq "arm64" ) {
+    # apple silicon
+    $minosx           = "11.0";
+} else {
+    # intel
+    $minosx           = "10.13";
+}
 
-$qwtfile       = "$src_dir/qwt-$qwt_version.tar.bz2";
-$qwtsrcdir     = "$src_dir/qt-$qt_version-qwt-$qwt_version";
+$xcode_version        = "12.5.1";
+$zstd_release         = "v1.5.6";
+$zstd_git             = "https://github.com/facebook/zstd.git";
 
-$us_mods       = "$scriptdir/../mods/win10-mingw64-templates";
+$openssl_release      = "1.1.1w";
+$openssl_dir          = "openssl-$openssl_release";
+$openssl_url          = "https://www.openssl.org/source/old/1.1.1/$openssl_dir.tar.gz";
+
+$qt_version           = "$qt_major_version.$qt_minor_version";
+$qtfile               = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
+$qtsrcname            = "qt-everywhere-src-$qt_version";
+$qtsrcdir             = "$src_dir/$qtsrcname";
+$qtshadow             = "$qtsrcdir/shadow-build";
+$qtinstalldir         = "$src_dir/qt-$qt_version";
+
+$qwtfile              = "$src_dir/qwt-$qwt_version.tar.bz2";
+$qwtsrcdir            = "$src_dir/qt-$qt_version-qwt-$qwt_version";
+
+$us_mods              = "$scriptdir/../mods/win10-mingw64-templates";
 
 ## end developer config
 
@@ -42,6 +60,8 @@ initopts(
     ,"brew",          "",          "install brew", 0
     ,"brewpackages",  "",          "install brew packages", 0
     ,"xcode",         "",          "download xcode version $xcode_version (will require APPLE ID", 0
+    ,"zstd",          "",          "build zstd-$zstd_release from source", 0
+    ,"openssl",       "",          "build openssl-$openssl_release from source", 0
     ,"git",           "repo",      "use specified repo instead of default $us_git", 1
     ,"qt",            "",          "download and build qt", 0
     ,"qwt",           "",          "download and build qwt", 0
@@ -54,6 +74,8 @@ initopts(
 $notes = "usage: $0 options
 
 installs needed components for building us3
+
+Note: minimum OSX release support by these builds is $minosx
 
 " . descopts() . "\n";
 
@@ -126,7 +148,46 @@ if ( $opts{xcode}{set} || $opts{all}{set} ) {
     print line('=');
     print "install xcode $xcode_version\n";
     print line('=');
-    my $cmd = "xcodes install $xcode_version";
+    my $cmd = "sudo xcodes install $xcode_version";
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
+# install zstd
+if ( $opts{zstd}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "build zstd\n";
+    print line('=');
+    my $cmd = 
+        "cd $src_dir"
+        . " && git clone $zstd_git zstd-$zstd_release"
+        . " && cd zstd-$zstd_release"
+        . " && git checkout tags/$zstd_release"
+        . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' Makefile"
+        . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' lib/Makefile"
+        . " && make -j $nprocs"
+##        . " && make install" ## had this in my notes but trying without
+        ;
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
+# install openssl
+if ( $opts{openssl}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "build openssl \n";
+    print line('=');
+    my $cmd = 
+        "cd $src_dir"
+        . " && wget -O $openssl_dir.tar.gz $openssl_url"
+        . " && tar zxf $openssl_dir.tar.gz"
+        . " && rm $openssl_dir.tar.gz"
+        . " && cd $openssl_dir"
+        . " && perl ./Configure --prefix=$src_dir/openssl -no-ssl3 no-ssl3-method darwin64-$arch-cc enable-ec_nistp_64_gcc_128"
+        . " && sed -i '' 's/^\\(CFLAGS=.*\$\\)/\\1 -mmacosx-version-min=$minosx/' Makefile"
+        . " && make -j $nprocs"
+        . " && make install"
+        ;
     my $res = run_cmd( $cmd, true );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
