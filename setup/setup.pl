@@ -33,32 +33,36 @@ if ( $arch eq "arm64" ) {
     $postgress_install_location = '/usr/local/opt/postgresql@14';
 }
 
-$xcode_version        = "12.5.1";
-$zstd_release         = "v1.5.6";
-$zstd_git             = "https://github.com/facebook/zstd.git";
+## these versions can be a moving target
 
-$openssl_release      = "1.1.1w";
-$openssl_dir          = "openssl-$openssl_release";
-$openssl_url          = "https://www.openssl.org/source/old/1.1.1/$openssl_dir.tar.gz";
+$xcode_version          = "12.5.1"; ## qt might work with 13.4.1
+$xcode_version_for_cpan = "14.3.1"; ## could be determined from perl version and a lookup hash
 
-$mysql_version        = "8.0.37";
-$mysql_release        = "mysql-boost-$mysql_version";
-$mysql_dir            = "mysql-$mysql_version";
-$mysql_url            = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysql_version.zip";
+$zstd_release           = "v1.5.6";
+$zstd_git               = "https://github.com/facebook/zstd.git";
+
+$openssl_release        = "1.1.1w";
+$openssl_dir            = "openssl-$openssl_release";
+$openssl_url            = "https://www.openssl.org/source/old/1.1.1/$openssl_dir.tar.gz";
+
+$mysql_version          = "8.0.37";
+$mysql_release          = "mysql-boost-$mysql_version";
+$mysql_dir              = "mysql-$mysql_version";
+$mysql_url              = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysql_version.zip";
  
-$python2_url          = "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg";
+$python2_url            = "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg";
 
-$qt_version           = "$qt_major_version.$qt_minor_version";
-$qtfile               = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
-$qtsrcname            = "qt-everywhere-src-$qt_version";
-$qtsrcdir             = "$src_dir/$qtsrcname";
-$qtshadow             = "$qtsrcdir/shadow-build";
-$qtinstalldir         = "$src_dir/qt-$qt_version";
+$qt_version             = "$qt_major_version.$qt_minor_version";
+$qtfile                 = "$src_dir/qt-everywhere-opensource-src-$qt_version.tar.xz";
+$qtsrcname              = "qt-everywhere-src-$qt_version";
+$qtsrcdir               = "$src_dir/$qtsrcname";
+$qtshadow               = "$qtsrcdir/shadow-build";
+$qtinstalldir           = "$src_dir/qt-$qt_version";
 
-$qwtfile              = "$src_dir/qwt-$qwt_version.tar.bz2";
-$qwtsrcdir            = "$src_dir/qt-$qt_version-qwt-$qwt_version";
+$qwtfile                = "$src_dir/qwt-$qwt_version.tar.bz2";
+$qwtsrcdir              = "$src_dir/qt-$qt_version-qwt-$qwt_version";
 
-$us_mods              = "$scriptdir/../mods/win10-mingw64-templates";
+$us_mods                = "$scriptdir/../mods/win10-mingw64-templates";
 
 ## end developer config
 
@@ -68,11 +72,12 @@ initopts(
     "all",            "",          "setup everything except --sshd, --us & --us_update", 0
     ,"brew",          "",          "install brew", 0
     ,"brewpackages",  "",          "install brew packages", 0
-    ,"xcode",         "",          "download xcode version $xcode_version (will require APPLE ID", 0
+    ,"xcode",         "",          "download xcode versions $xcode_version & $xcode_version_for_cpan [for perl modules] N.B. will require APPLE ID", 0
     ,"zstd",          "",          "build zstd-$zstd_release from source", 0
     ,"openssl",       "",          "build openssl-$openssl_release from source", 0
     ,"mysql",         "",          "build $mysql_release from source", 0
     ,"python2",       "",          "download and install python2, Qt seems to need it for building pdfs", 0
+    ,"doxygen",       "",          "install doxygen and cpanm AppConfig Template to allow doc building", 0
     ,"qt",            "",          "download and build qt", 0
     ,"qwt",           "",          "download and build qwt", 0
     ,"git",           "repo",      "use specified repo instead of default $us_git", 1
@@ -116,6 +121,7 @@ if ( $opts{procs}{set} ) {
     ,"xcodesorg/made/xcodes"
     ,"llvm"
     ,"pkg-config"
+    ,"cpanminus"
     );
 
 ## setup $src_dir
@@ -135,8 +141,7 @@ if ( $opts{brew}{set} || $opts{all}{set} ) {
     } else {
         print "installing brew, this make take awhile & also ask you for a password\n";
         my $cmd = '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
-        my $res = run_cmd( $cmd, true );
-        error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+        run_cmd( $cmd );
     }
 }
 
@@ -164,13 +169,11 @@ if ( $opts{xcode}{set} || $opts{all}{set} ) {
     print line('=');
     {
         my $cmd = "sudo xcodes install $xcode_version";
-        my $res = run_cmd( $cmd, true );
-        error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+        print run_cmd( $cmd );
     }
     {
-        my $cmd = "sudo xcodes select $xcode_version";
-        my $res = run_cmd( $cmd, true );
-        error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+        my $cmd = "sudo xcodes install $xcode_version_for_cpan";
+        print run_cmd( $cmd, true );
     }
 }
 
@@ -180,7 +183,8 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
     print "build zstd\n";
     print line('=');
     my $cmd = 
-        "cd $src_dir"
+        "xcodes select $xcode_version"
+        . " && cd $src_dir"
         . " && git clone $zstd_git zstd-$zstd_release"
         . " && cd zstd-$zstd_release"
         . " && git checkout tags/$zstd_release"
@@ -199,7 +203,8 @@ if ( $opts{openssl}{set} || $opts{all}{set} ) {
     print "build openssl \n";
     print line('=');
     my $cmd = 
-        "cd $src_dir"
+        "xcodes select $xcode_version"
+        . " && cd $src_dir"
         . " && wget -O $openssl_dir.tar.gz $openssl_url"
         . " && tar zxf $openssl_dir.tar.gz"
         . " && rm $openssl_dir.tar.gz"
@@ -219,7 +224,8 @@ if ( $opts{mysql}{set} || $opts{all}{set} ) {
     print "build mysql \n";
     print line('=');
     my $cmd = 
-        "cd $src_dir"
+        "xcodes select $xcode_version"
+        . " && cd $src_dir"
         . " && wget -O $mysql_dir.tar.gz $mysql_url"
         . " && tar xf $mysql_dir.tar.gz"
         . " && rm $mysql_dir.tar.gz"
@@ -247,10 +253,27 @@ if ( $opts{python2}{set} || $opts{all}{set} ) {
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
 
+# install doxygen, tpage
+if ( $opts{doxygen}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "install doxygen\n";
+    print line('=');
+    my $cmd = 
+        " xcodes select $xcode_version_for_cpan"
+        . " && sudo cpanm AppConfig Template"
+        . " && brew install Doxygen"
+        ; 
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
 if ( $opts{qt}{set} || $opts{all}{set} ) {
     print line('=');
     print "processing qt\n";
     print line('=');
+
+    my $cmd = "xcodes select $xcode_version";
+    print run_cmd( $cmd );
 
     ## download qt
 
@@ -313,6 +336,9 @@ if ( $opts{qwt}{set} || $opts{all}{set} ) {
     print "processing qwt\n";
     print line('=');
 
+    my $cmd = "xcodes select $xcode_version";
+    print run_cmd( $cmd );
+
     ## download qwt
     if ( -e $qwtfile ) {
         warn "NOTICE: $qwtfile exists, not downloading again. Remove if you want a fresh download\n";
@@ -345,9 +371,13 @@ if ( $opts{git}{set} ) {
 }
 
 if ( $opts{us}{set} ) {
+
     print line('=');
     print "processing us\n";
     print line('=');
+
+    my $cmd = "xcodes select $xcode_version";
+    print run_cmd( $cmd );
 
     error_exit( "$us_mods does not exist" ) if !-d $us_mods;
     
@@ -416,8 +446,11 @@ if ( $opts{us}{set} ) {
 
 if ( $opts{us_update}{set} ) {
     print line('=');
-    print "processing us\n";
+    print "processing us_update\n";
     print line('=');
+
+    my $cmd = "xcodes select $xcode_version";
+    print run_cmd( $cmd );
 
     error_exit( "$us_mods does not exist" ) if !-d $us_mods;
     
