@@ -1,0 +1,30 @@
+export QTDIR=__qtinstalldir__
+export DYLD_FRAMEWORK_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+export PATH=$QTDIR/bin:$PATH
+
+QWTDIR=__qwtsrcdir__
+#QMAKESPEC=macx-clang
+#unset QTMAKESPEC
+
+US3DIR=__ultrascandir__
+QTBIN=${QTDIR}/bin
+QTLIB=${QTDIR}/lib
+QTINC=${QTDIR}/include
+US3BIN=${US3DIR}/bin
+US3LIB=${US3DIR}/lib
+QWTLIB=${QWTDIR}/lib
+
+#       set PATH, LD, QTDIR, and others  for US-3 and Qt-5
+PATH=${US3BIN}:${QTBIN}:$PATH
+DYLD_LIBRARY_PATH=${US3LIB}:${QTLIB}:${QWTLIB}:$DYLD_LIBRARY_PATH
+ULTRASCAN=${US3DIR}
+us3=${ULTRASCAN}
+MAKEFLAGS="-j __nprocs__"
+
+export PATH DYLD_LIBRARY_PATH QTDIR QWTDIR ULTRASCAN QMAKESPEC us3 MAKEFLAGS
+
+export US3SOMO=__ultrascandir__/us_somo
+export DYLD_LIBRARY_PATH=$US3SOMO/lib:$DYLD_LIBRARY_PATH
+export PATH=$US3SOMO/bin64:$PATH
+
+export DYLD_FRAMEWORK_PATH=$QTDIR/lib:$QWTDIR/lib:$DYLD_FRAMEWORK_PATH

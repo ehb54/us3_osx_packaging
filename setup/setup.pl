@@ -35,6 +35,9 @@ if ( $arch eq "arm64" ) {
 
 ## these versions can be a moving target
 
+$xquartz_release        = "XQuartz-2.8.1";
+$xquartz_url            = "https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.1/$xquartz_release.dmg";
+
 $xcode_version          = "12.5.1"; ## qt might work with 13.4.1
 $xcode_version_for_cpan = "14.3.1"; ## could be determined from perl version and a lookup hash
 
@@ -62,7 +65,7 @@ $qtinstalldir           = "$src_dir/qt-$qt_version";
 $qwtfile                = "$src_dir/qwt-$qwt_version.tar.bz2";
 $qwtsrcdir              = "$src_dir/qt-$qt_version-qwt-$qwt_version";
 
-$us_mods                = "$scriptdir/../mods/win10-mingw64-templates";
+$us_mods                = "$scriptdir/../mods/osx_templates";
 
 ## end developer config
 
@@ -72,6 +75,7 @@ initopts(
     "all",            "",          "setup everything except --sshd, --us & --us_update", 0
     ,"brew",          "",          "install brew", 0
     ,"brewpackages",  "",          "install brew packages", 0
+    ,"xquartz",       "",          "install xquartz ($xquartz_release)", 0
     ,"xcode",         "",          "download xcode versions $xcode_version & $xcode_version_for_cpan [for perl modules] N.B. will require APPLE ID", 0
     ,"zstd",          "",          "build zstd-$zstd_release from source", 0
     ,"openssl",       "",          "build openssl-$openssl_release from source", 0
@@ -160,6 +164,23 @@ if ( $opts{brewpackages}{set} || $opts{all}{set} ) {
         print "$res\n";
         error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
     }
+}
+
+# install xquartz
+if ( $opts{xquartz}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "install xquartz\n";
+    print line('=');
+    my $cmd = 
+        "cd $src_dir"
+        . " && wget -O xquartz.dmg $xquartz_url"
+        . " && hdiutil attach xquartz.dmg"
+        . " && sudo installer -verbose -pkg /Volumes/$xquartz_release/XQuartz.pkg -target /"
+        . " && hdiutil detach /Volumes/$xquartz_release"
+        . " && rm xquartz.dmg"
+        ; 
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
 }
 
 # install xcode
@@ -400,7 +421,18 @@ if ( $opts{us}{set} ) {
     {
         my @sedlines;
         push @sedlines, "s/__nprocs__/$nprocs/g";
-        
+        push @sedlines, "s/__minosx__/$minosx/g";
+
+        {
+            my $openssl_dir_sed = "$src_dir/$openssl_dir";
+            $openssl_dir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__openssldir__/$openssl_dir_sed/g";
+        }
+        {
+            my $mysql_dir_sed = "$src_dir/$mysql_dir";
+            $mysql_dir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__mysqldir__/$mysql_dir_sed/g";
+        }
         {
             my $us_dir_sed = $us_dir;
             $us_dir_sed =~ s/\//\\\//g;
@@ -417,6 +449,11 @@ if ( $opts{us}{set} ) {
             push @sedlines, "s/__qwtsrcdir__/$qwtsrcdir_sed/g";
         }
         $sedline = join ';', @sedlines;
+        if ( $debug >= 2 ) {
+            print "---\n";
+            print join "\n", @sedlines;
+            print "\n---\n";
+        }
     }
         
     my @files = `cd $us_mods && find * -type f | grep -v \\~`;
@@ -468,7 +505,18 @@ if ( $opts{us_update}{set} ) {
     {
         my @sedlines;
         push @sedlines, "s/__nprocs__/$nprocs/g";
-        
+        push @sedlines, "s/__minosx__/$minosx/g";
+
+        {
+            my $openssl_dir_sed = "$src_dir/$openssl_dir";
+            $openssl_dir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__openssldir__/$openssl_dir_sed/g";
+        }
+        {
+            my $mysql_dir_sed = "$src_dir/$mysql_dir";
+            $mysql_dir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__mysqldir__/$mysql_dir_sed/g";
+        }
         {
             my $us_dir_sed = $us_dir;
             $us_dir_sed =~ s/\//\\\//g;
@@ -485,6 +533,11 @@ if ( $opts{us_update}{set} ) {
             push @sedlines, "s/__qwtsrcdir__/$qwtsrcdir_sed/g";
         }
         $sedline = join ';', @sedlines;
+        if ( $debug >= 2 ) {
+            print "---\n";
+            print join "\n", @sedlines;
+            print "\n---\n";
+        }
     }
         
     my @files = `cd $us_mods && find * -type f | grep -v \\~`;
