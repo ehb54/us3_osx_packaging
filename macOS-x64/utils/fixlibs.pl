@@ -48,17 +48,20 @@ for my $lib ( @ARGV ) {
         print "$ba dep $d\n";
 
         if ( $d =~ /\.framework/ ) {
-            $cmds .= "install_name_tool -change $d \@rpath/$d $f\n";
+            my $bd = $d;
+            $bd =~ s/^(\@rpath\/|\@executable_path\/|\.\.\/)+//g;
+            print "$d\n-->\@rpath/$bd\n";
+            $cmds .= "install_name_tool -change $d \@rpath/$bd $f\n";
             next;
         }
 
-        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/User|\@rpath\/lib)/ ) {
+        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/User|\@rpath\/lib|\@executable_path)/ ) {
             my $bd = basename( $d );
             $cmds .= "install_name_tool -change $d \@rpath/lib/$bd $f\n";
             next;
         }
 
-        die "don't know what to do\n";
+        die "don't know what to do [$d] " . basename( $d ) . "\n";
     }
 
     $cmds .= "codesign -fs - $f\n";

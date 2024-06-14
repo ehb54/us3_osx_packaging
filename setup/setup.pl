@@ -35,8 +35,8 @@ if ( $arch eq "arm64" ) {
 
 ## these versions can be a moving target
 
-$xquartz_release        = "XQuartz-2.8.1";
-$xquartz_url            = "https://github.com/XQuartz/XQuartz/releases/download/XQuartz-2.8.1/$xquartz_release.dmg";
+$xquartz_release        = "XQuartz-2.8.2";
+$xquartz_url            = "https://github.com/XQuartz/XQuartz/releases/download/$xquartz_release/$xquartz_release.dmg";
 
 $xcode_version          = "12.5.1"; ## qt might work with 13.4.1
 $xcode_version_for_cpan = "14.3.1"; ## could be determined from perl version and a lookup hash

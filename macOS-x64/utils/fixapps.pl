@@ -65,7 +65,8 @@ for my $a ( @ARGV ) {
             next;
         }
 
-        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/Users|\@rpath\/lib)/ ) {
+#        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/Users|\@rpath\/lib)/ ) {
+        if ( $d =~ /^(\/opt|lib|\/usr\/local|\/User|\@rpath\/lib|\@executable_path)/ ) {
             my $bd = basename( $d );
             $cmds .= "install_name_tool -change $d \@rpath/lib/$bd $f\n";
             next;
