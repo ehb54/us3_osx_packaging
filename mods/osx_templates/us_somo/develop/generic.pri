@@ -41,6 +41,7 @@ win32 {
 }
 
 macx {
+  CONFIG += c++14
   DESTDIR      = $$US3SOMOPATH/bin
   LIBS        += -L$$US3SOMOPATH/lib -lus_somo
 }

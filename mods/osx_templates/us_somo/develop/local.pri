@@ -114,7 +114,7 @@ macx {
 #  QMAKE_CFLAGS += -std=c++11
 #  QMAKE_CXXFLAGS += -std=gnu++11
    QMAKE_MACOSX_DEPLOYMENT_TARGET = __minosx__
-   CONFIG += c++11
+   CONFIG += c++14
 message( "macx" );
   CONFIG      *= x86_64
   DEFINES     += MAC OSX

@@ -8,6 +8,7 @@ macx {
     BUILDBASE   = $us3
     QWTPATH     = __qwtsrcdir__
     #  QWTLIB      = -L$$QWTPATH/lib -lqwt
+    CONFIG      += c++14
     CONFIG      += x86_64
     DEFINES     += MAC OSX
     INCLUDEPATH += $$QWTPATH/src
