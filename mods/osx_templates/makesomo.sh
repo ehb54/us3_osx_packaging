@@ -138,8 +138,8 @@ ls -lrt ./lib ./bin64
 echo ""
 echo "rsync -av --exclude .svn $SOMO3/lib/ $ULTRASCAN/lib"
 rsync -av --exclude .svn $SOMO3/lib/ $ULTRASCAN/lib
-echo "rsync -av --exclude .svn $SOMO3/bin64/ $ULTRASCAN/bin"
-rsync -av --exclude .svn $SOMO3/bin64/ $ULTRASCAN/bin
+echo "rsync -av --exclude .svn $SOMO3/bin/ $ULTRASCAN/bin"
+rsync -av --exclude .svn $SOMO3/bin/ $ULTRASCAN/bin
 echo rsync -av --exclude .svn $SOMO3/add_to_bin/ $ULTRASCAN/bin
 rsync -av --exclude .svn $SOMO3/add_to_bin/ $ULTRASCAN/bin
 echo rsync -av --exclude .svn $SOMO3/etc/ $ULTRASCAN/etc

@@ -89,6 +89,7 @@ initopts(
     ,"us_update",     "branch",    "update existing branch,", 1
     ,"procs",         "n",         "set number of processors (default $nprocs)", 1
     ,"help",          "",          "print help", 0
+    ,"frameworks",    "branch",    "temp install frameworks help", 1
     );
 
 $notes = "usage: $0 options
@@ -456,6 +457,8 @@ if ( $opts{us}{set} ) {
         }
     }
         
+    my @cmds;
+
     my @files = `cd $us_mods && find * -type f | grep -v \\~`;
     grep chomp, @files;
     for my $f ( @files ) {
@@ -476,9 +479,53 @@ if ( $opts{us}{set} ) {
     for my $cmd ( @cmds ) {
         run_cmd( $cmd );
     }
-    
-    ## configure & build ultrascan?
-    ## setup qt5env
+
+    ## setup frameworks
+
+    ## setup frameworks
+
+    my @cmds = (
+        "mkdir $us_dir/Frameworks; echo 0"
+        ,"cd $qtinstalldir/lib && cp -rp *framework $us_dir/Frameworks"
+        ,"cd $qtinstalldir/bin && cp -rp *Assistant.app $us_dir/bin"
+        ,"cd $qtinstalldir && cp -rp plugins $us_dir/"
+        ,"cd $qwtsrcdir/lib && cp -rp *framework $us_dir/Frameworks"
+        ,"cd $us_dir/Frameworks && find . -name 'Headers' -type d | xargs rm -fr"
+        ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
+        ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
+        ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        );
+        
+    for my $cmd ( @cmds ) {
+        run_cmd( $cmd );
+    }
+}
+
+if ( $opts{frameworks}{set} ) {
+    print line('=');
+    print "processing frameworks\n";
+    print line('=');
+
+    my $branch = $opts{frameworks}{args}[0];
+    my $us_dir = "$us_base/$us_prefix-$branch";
+
+    ## setup frameworks
+
+    my @cmds = (
+        "mkdir $us_dir/Frameworks; echo 0"
+        ,"cd $qtinstalldir/lib && cp -rp *framework $us_dir/Frameworks"
+        ,"cd $qtinstalldir/bin && cp -rp *Assistant.app $us_dir/bin"
+        ,"cd $qtinstalldir && cp -rp plugins $us_dir/"
+        ,"cd $qwtsrcdir/lib && cp -rp *framework $us_dir/Frameworks"
+        ,"cd $us_dir/Frameworks && find . -name 'Headers' -type d | xargs rm -fr"
+        ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
+        ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
+        ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        );
+        
+    for my $cmd ( @cmds ) {
+        run_cmd( $cmd );
+    }
 }
 
 if ( $opts{us_update}{set} ) {
@@ -569,7 +616,4 @@ if ( $opts{us_update}{set} ) {
         my $cmd = "rm " . ( join ' ', @makefiles );
         run_cmd( $cmd );
     }
-
-    ## configure & build ultrascan?
-    ## setup qt5env
 }
