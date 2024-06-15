@@ -72,7 +72,7 @@ $us_mods                = "$scriptdir/../mods/osx_templates";
 require "$scriptdir/utility.pm";
 
 initopts(
-    "all",            "",          "setup everything except --sshd, --us & --us_update", 0
+    "all",            "",          "setup everything except --us & --us_update", 0
     ,"brew",          "",          "install brew", 0
     ,"brewpackages",  "",          "install brew packages", 0
     ,"xquartz",       "",          "install xquartz ($xquartz_release)", 0
