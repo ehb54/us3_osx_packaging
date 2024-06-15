@@ -2,6 +2,8 @@
 
 $reqformat = 'application';
 
+$sudo = ""; # sudo should not be needed
+
 $notes = "usage: $0 dir
 
 copies files needed to run to specified dir
@@ -40,7 +42,7 @@ die "bad directory $tdir must contain '$reqformat'\n" if $tdir !~ /$reqformat/;
 
 if ( -d $tdir ) {
     print "directory exists, removing all contents\n";
-    $cmd = "sudo rm -fr $tdir/*";
+    $cmd = "$sudo rm -fr $tdir/*";
     print "$cmd\n";
     sleep 3;
     print `$cmd`;

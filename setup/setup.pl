@@ -182,6 +182,7 @@ if ( $opts{xquartz}{set} || $opts{all}{set} ) {
         ; 
     my $res = run_cmd( $cmd, true );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+    print "NOTICE: *** system must be rebooted for XQuartz to work properly ***";
 }
 
 # install xcode
@@ -486,14 +487,14 @@ if ( $opts{us}{set} ) {
 
     my @cmds = (
         "mkdir $us_dir/Frameworks; echo 0"
-        ,"cd $qtinstalldir/lib && cp -rp *framework $us_dir/Frameworks"
-        ,"cd $qtinstalldir/bin && cp -rp *Assistant.app $us_dir/bin"
-        ,"cd $qtinstalldir && cp -rp plugins $us_dir/"
-        ,"cd $qwtsrcdir/lib && cp -rp *framework $us_dir/Frameworks"
-        ,"cd $us_dir/Frameworks && find . -name 'Headers' -type d | xargs rm -fr"
+        ,"cd $qtinstalldir/lib && rsync -av --exclude Headers --exclude QtUiPlugin.framework --exclude QtRepParser.framework *framework $us_dir/Frameworks"
+        ,"cd $qtinstalldir/bin && rsync -av *Assistant.app $us_dir/bin"
+        ,"cd $qtinstalldir && rsync -av plugins $us_dir/"
+        ,"cd $qwtsrcdir/lib && rsync -av --exclude Headers *framework $us_dir/Frameworks"
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        ,"cd $us_dir && $scriptdir/../macOS-x64/utils/fixframeworks.pl Frameworks/*.framework"
         );
         
     for my $cmd ( @cmds ) {
@@ -513,14 +514,14 @@ if ( $opts{frameworks}{set} ) {
 
     my @cmds = (
         "mkdir $us_dir/Frameworks; echo 0"
-        ,"cd $qtinstalldir/lib && cp -rp *framework $us_dir/Frameworks"
-        ,"cd $qtinstalldir/bin && cp -rp *Assistant.app $us_dir/bin"
-        ,"cd $qtinstalldir && cp -rp plugins $us_dir/"
-        ,"cd $qwtsrcdir/lib && cp -rp *framework $us_dir/Frameworks"
-        ,"cd $us_dir/Frameworks && find . -name 'Headers' -type d | xargs rm -fr"
+        ,"cd $qtinstalldir/lib && rsync -av --exclude Headers --exclude QtUiPlugin.framework --exclude QtRepParser.framework *framework $us_dir/Frameworks"
+        ,"cd $qtinstalldir/bin && rsync -av *Assistant.app $us_dir/bin"
+        ,"cd $qtinstalldir && rsync -av plugins $us_dir/"
+        ,"cd $qwtsrcdir/lib && rsync -av --exclude Headers *framework $us_dir/Frameworks"
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        ,"cd $us_dir && $scriptdir/../macOS-x64/utils/fixframeworks.pl Frameworks/*.framework"
         );
         
     for my $cmd ( @cmds ) {

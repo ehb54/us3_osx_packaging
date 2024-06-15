@@ -99,8 +99,15 @@ for $f ( @all ) {
 
     grep chomp, @deps;
 
+# debug 20240615
+#    print '-'x80 . "\n";
+#    print "all item '$f'\n";
+#    print '-'x80 . "\n";
+    
     ## catagorize & store deps
     for my $d ( @deps ) {
+# debug 20240615
+#        print "checking dep $d\n";
         if ( $d =~ /^\/System\/Library\/Frameworks/ ) {
             $syslibs{ $d }++;
             next;
@@ -165,6 +172,9 @@ for $f ( @all ) {
         $todos{ $d } .= $todos{ $d } ? " $f" : $f;
     }
 }
+
+# debug 20240615
+# die "testing\n";
 
 ## extra checks
 
