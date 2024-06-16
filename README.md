@@ -11,8 +11,8 @@ repo for info &amp; supplementary data to build us3 osx packages
   - clone this repo (typically from your home directory, it will be assume so in the commands below)
     - note some of the commmands will require you to enter your password, others your Apple ID and its password
     - note that 'BRANCHNAME' below is to be replaced by the branch of the ultrascan3 repo you wish to build
-  - quick way
-    - still questionable to recommended - you need to watch it and get your password entered
+  - quick way NOT RECOMMENDED
+    - still questionable to recommended - you need to watch it and get your password entered in multiple steps
 ```
 export XCODES_USERNAME='your-appleID'
 export XCODES_PASSWORD='your-appleID-password'
@@ -27,9 +27,9 @@ cd ~/ultrascan-BRANCHNAME
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
-## this find command should report the commands to run next to build the packages themselves
+## this final command should report the commands to run next to build the packages themselves
 ```
-  - step-by-step way
+  - step-by-step way - recommended
 ```
 ~us3_osx_packaging/setup/setup.pl --brew
 ~us3_osx_packaging/setup/setup.pl --brewpackages
@@ -53,7 +53,7 @@ cd ~/ultrascan-BRANCHNAME
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
-## this find command should report the commands to run next to build the packages themselves
+## this final command should report the commands to run next to build the packages themselves
 ```
 
  - if all goes well, your package will be in `~/Downloads`
@@ -62,7 +62,7 @@ cd ~/ultrascan-BRANCHNAME
 - all cases, make sure to have the latest packaging code
   - `cd ~/us3_osx_packaging`
   - `git pull` 
-- existing branch
+### existing branch
 ```
 cd ~/ultrascan-BRANCHNAME
 git fetch origin
@@ -77,9 +77,10 @@ git pull
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
+## this final command should report the commands to run next to build the packages themselves
 ```
-  - if all goes well, your package will be in `~/Downloads`
-- new branch
+   - if all goes well, your package will be in `~/Downloads`
+### new branch
 ```
 ~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
 cd ~/ultrascan-BRANCHNAME
@@ -91,8 +92,9 @@ cd ~/ultrascan-BRANCHNAME
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
+## this final command should report the commands to run next to build the packages themselves
 ```
-  - if all goes well, your package will be in `~/Downloads`
+   - if all goes well, your package will be in `~/Downloads`
 
 ## notes
 
