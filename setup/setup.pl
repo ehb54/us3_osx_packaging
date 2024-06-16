@@ -38,7 +38,8 @@ if ( $arch eq "arm64" ) {
 $xquartz_release        = "XQuartz-2.8.2";
 $xquartz_url            = "https://github.com/XQuartz/XQuartz/releases/download/$xquartz_release/$xquartz_release.dmg";
 
-$xcode_version          = "12.5.1"; ## qt might work with 13.4.1
+$xcode_version          = "13.4.1"; ## previously 12.5.1
+# $xcode_sdk_version      = "12.3";    ## previously 11.3
 $xcode_version_for_cpan = "14.3.1"; ## could be determined from perl version and a lookup hash
 
 $zstd_release           = "v1.5.6";
@@ -208,7 +209,7 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
     my $cmd = 
         "xcodes select $xcode_version"
         . " && cd $src_dir"
-        . " && git clone $zstd_git zstd-$zstd_release"
+        . " && git clone -j $nprocs $zstd_git zstd-$zstd_release"
         . " && cd zstd-$zstd_release"
         . " && git checkout tags/$zstd_release"
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' Makefile"
@@ -253,7 +254,7 @@ if ( $opts{mysql}{set} || $opts{all}{set} ) {
         . " && tar xf $mysql_dir.tar.gz"
         . " && rm $mysql_dir.tar.gz"
         . " && cd $mysql_dir"
-        . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Applications/Xcode-12.5.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
+        . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Applications/Xcode-$xcode_version.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
         . " && make -j $nprocs"
         . " && make install"
         ;
@@ -411,7 +412,7 @@ if ( $opts{us}{set} ) {
 
     print "UltraScan will be cloned in $us_dir\n";
 
-    my $cmd = "git clone -b $branch $us_git $us_dir";
+    my $cmd = "git clone -j $nprocs -b $branch $us_git $us_dir";
     print run_cmd( $cmd );
 
     ## copy over $us_mods
@@ -491,6 +492,7 @@ if ( $opts{us}{set} ) {
         ,"cd $qtinstalldir/bin && rsync -av *Assistant.app $us_dir/bin"
         ,"cd $qtinstalldir && rsync -av plugins $us_dir/"
         ,"cd $qwtsrcdir/lib && rsync -av --exclude Headers *framework $us_dir/Frameworks"
+        ,"mkdir $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
@@ -518,6 +520,7 @@ if ( $opts{frameworks}{set} ) {
         ,"cd $qtinstalldir/bin && rsync -av *Assistant.app $us_dir/bin"
         ,"cd $qtinstalldir && rsync -av plugins $us_dir/"
         ,"cd $qwtsrcdir/lib && rsync -av --exclude Headers *framework $us_dir/Frameworks"
+        ,"mkdir $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
