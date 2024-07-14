@@ -16,8 +16,8 @@ repo for info &amp; supplementary data to build us3 osx packages
 ```
 export XCODES_USERNAME='your-appleID'
 export XCODES_PASSWORD='your-appleID-password'
-~us3_osx_packaging/setup/setup.pl --all
-~us3_osx_packaging/setup/setup.pl --us BRANCHNAME
+~/us3_osx_packaging/setup/setup.pl --all
+~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
 cd ~/ultrascan-BRANCHNAME
 . qt5env
 ./makeall.sh
@@ -31,19 +31,19 @@ cd ~/ultrascan-BRANCHNAME
 ```
   - step-by-step way - recommended
 ```
-~us3_osx_packaging/setup/setup.pl --brew
-~us3_osx_packaging/setup/setup.pl --brewpackages
-~us3_osx_packaging/setup/setup.pl --xquartz
+~/us3_osx_packaging/setup/setup.pl --brew
+~/us3_osx_packaging/setup/setup.pl --brewpackages
+~/us3_osx_packaging/setup/setup.pl --xquartz
 xcodes install 13.4.1
 xcodes install 14.3.1
-~us3_osx_packaging/setup/setup.pl --zstd
-~us3_osx_packaging/setup/setup.pl --openssl
-~us3_osx_packaging/setup/setup.pl --mysql
-~us3_osx_packaging/setup/setup.pl --python2
-~us3_osx_packaging/setup/setup.pl --doxygen
-~us3_osx_packaging/setup/setup.pl --qt
-~us3_osx_packaging/setup/setup.pl --qwt
-~us3_osx_packaging/setup/setup.pl --us BRANCHNAME
+~/us3_osx_packaging/setup/setup.pl --zstd
+~/us3_osx_packaging/setup/setup.pl --openssl
+~/us3_osx_packaging/setup/setup.pl --mysql
+~/us3_osx_packaging/setup/setup.pl --python2
+~/us3_osx_packaging/setup/setup.pl --doxygen
+~/us3_osx_packaging/setup/setup.pl --qt
+~/us3_osx_packaging/setup/setup.pl --qwt
+~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
 cd ~/ultrascan-BRANCHNAME
 . qt5env
 ./makeall.sh
