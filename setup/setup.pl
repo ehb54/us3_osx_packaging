@@ -7,6 +7,7 @@ $qt_minor_version = "14";
 $qwt_version      = "6.1.6";
 $src_dir          = "$ENV{HOME}/src";  ## where qt qwt etc will be compiled
 $nprocs           = `sysctl -n hw.ncpu` + 1;
+$cprocs           = 1;
 $debug            = 1; ## primarily prints commands as they are run
 $us_git           = "https://github.com/ehb54/ultrascan3";
 $us_base          = $ENV{HOME};        ## base path for ultrascan downloads
@@ -89,6 +90,7 @@ initopts(
     ,"us",            "branch",    "branch download and setup ultrascan", 1
     ,"us_update",     "branch",    "update existing branch,", 1
     ,"procs",         "n",         "set number of processors (default $nprocs)", 1
+    ,"cprocs",        "n",         "set number of processors for git clones (default $cprocs)", 1
     ,"help",          "",          "print help", 0
     ,"frameworks",    "branch",    "temp install frameworks help", 1
     );
@@ -209,7 +211,7 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
     my $cmd = 
         "xcodes select $xcode_version"
         . " && cd $src_dir"
-        . " && git clone -j $nprocs $zstd_git zstd-$zstd_release"
+        . " && git clone -j $cprocs $zstd_git zstd-$zstd_release"
         . " && cd zstd-$zstd_release"
         . " && git checkout tags/$zstd_release"
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' Makefile"
@@ -412,7 +414,7 @@ if ( $opts{us}{set} ) {
 
     print "UltraScan will be cloned in $us_dir\n";
 
-    my $cmd = "git clone -j $nprocs -b $branch $us_git $us_dir";
+    my $cmd = "git clone -j $cprocs -b $branch $us_git $us_dir";
     print run_cmd( $cmd );
 
     ## copy over $us_mods
