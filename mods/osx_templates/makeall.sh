@@ -111,11 +111,11 @@ else
   echo "NO Doxygen used"
 fi
 
-if [ $ISMAC -ne 0 ]; then
-  echo "Running libnames and appnames ..." |tee -a $DIR/build.log
-  $DIR/libnames.sh >> $DIR/build.log
-  $DIR/appnames.sh >> $DIR/build.log
-fi
+#if [ $ISMAC -ne 0 ]; then
+#  echo "Running libnames and appnames ..." |tee -a $DIR/build.log
+#  $DIR/libnames.sh >> $DIR/build.log
+#  $DIR/appnames.sh >> $DIR/build.log
+#fi
 
 if [ $NBERR -gt 0 ]; then
   echo "*** $NBERR Build Error(s) ***"

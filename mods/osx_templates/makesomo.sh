@@ -109,11 +109,11 @@ ${MAKE} -f Makefile-lib
 ${MAKE} -f Makefile-all
 cd $SOMO3
 
-if [ $ISMAC -ne 0 ]; then
-  echo "RUN libnames, appnames"
-  ./somo_libnames.sh
-  ./somo_appnames.sh
-fi
+#if [ $ISMAC -ne 0 ]; then
+#  echo "RUN libnames, appnames"
+#  ./somo_libnames.sh
+#  ./somo_appnames.sh
+#fi
 
 # symlink bin64 to bin util somo is updated to drop bin64                                                                                                                                                             
 if [ "`uname -s`" = "Linux" ]; then
