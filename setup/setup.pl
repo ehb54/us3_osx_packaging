@@ -130,6 +130,7 @@ if ( $opts{procs}{set} ) {
     ,"llvm"
     ,"pkg-config"
     ,"cpanminus"
+    ,"libarchive"
     );
 
 ## setup $src_dir
