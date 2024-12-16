@@ -39,6 +39,7 @@ xcodes install 14.3.1
 ~/us3_osx_packaging/setup/setup.pl --zstd
 ~/us3_osx_packaging/setup/setup.pl --openssl
 ~/us3_osx_packaging/setup/setup.pl --mysql
+~/us3_osx_packaging/setup/setup.pl --libarchive
 ~/us3_osx_packaging/setup/setup.pl --python2
 ~/us3_osx_packaging/setup/setup.pl --doxygen
 ~/us3_osx_packaging/setup/setup.pl --qt
