@@ -50,6 +50,7 @@ for my $lib ( @ARGV ) {
         if ( $d =~ /\.framework/ ) {
             my $bd = $d;
             $bd =~ s/^(\@rpath\/|\@executable_path\/|\.\.\/)+//g;
+            $bd =~ s/Frameworks\/Frameworks/Frameworks/;
             print "$d\n-->\@rpath/$bd\n";
             $cmds .= "install_name_tool -change $d \@rpath/$bd $f\n";
             next;
@@ -57,6 +58,7 @@ for my $lib ( @ARGV ) {
 
         if ( $d =~ /^(\/opt|lib|\/usr\/local|\/User|\@rpath\/lib|\@executable_path)/ ) {
             my $bd = basename( $d );
+            $bd =~ s/Frameworks\/Frameworks/Frameworks/;
             $cmds .= "install_name_tool -change $d \@rpath/lib/$bd $f\n";
             next;
         }

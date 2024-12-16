@@ -149,6 +149,9 @@ rsync -av --exclude .svn $SOMO3/somo/ $ULTRASCAN/somo/
 echo cd $ULTRASCAN/somo && rm -fr arc  *.pl *.sh *.txt test
 cd $ULTRASCAN/somo && rm -fr arc  *.pl *.sh *.txt test
 echo ""
+cd $ULTRASCAN
+ls -ld bin/us3_somo.app bin/us3_somo.app bin/us3_config.app bin/us_admin.cpp bin/us_saxs_cmds_t.app
+ls -l lib/*somo*
 echo "MAKE of somo complete"
 
 exit 0

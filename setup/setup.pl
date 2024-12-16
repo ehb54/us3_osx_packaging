@@ -64,6 +64,12 @@ $qtsrcdir               = "$src_dir/$qtsrcname";
 $qtshadow               = "$qtsrcdir/shadow-build";
 $qtinstalldir           = "$src_dir/qt-$qt_version";
 
+$libarchive_release     = "3.7.7";
+$libarchive_file        = "libarchive-$libarchive_release.tar.xz";
+$libarchive_url         = "https://github.com/libarchive/libarchive/releases/download/v$libarchive_release/$libarchive_file";
+$libarchive_src         = "$src_dir/libarchive-$libarchive_release";
+$libarchive_dir         = "$src_dir/libarchive";
+
 $qwtfile                = "$src_dir/qwt-$qwt_version.tar.bz2";
 $qwtsrcdir              = "$src_dir/qt-$qt_version-qwt-$qwt_version";
 
@@ -82,6 +88,7 @@ initopts(
     ,"zstd",          "",          "build zstd-$zstd_release from source", 0
     ,"openssl",       "",          "build openssl-$openssl_release from source", 0
     ,"mysql",         "",          "build $mysql_release from source", 0
+    ,"libarchive",    "",          "build libarchive from source", 0
     ,"python2",       "",          "download and install python2, Qt seems to need it for building pdfs", 0
     ,"doxygen",       "",          "install doxygen and cpanm AppConfig Template to allow doc building", 0
     ,"qt",            "",          "download and build qt", 0
@@ -257,6 +264,29 @@ if ( $opts{mysql}{set} || $opts{all}{set} ) {
         . " && rm $mysql_dir.tar.gz"
         . " && cd $mysql_dir"
         . " && cmake . -DCMAKE_INSTALL_PREFIX=$src_dir/mysql-client-$mysql_version -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DBUILD_TESTING=OFF -DCMAKE_OSX_SYSROOT=/Applications/Xcode-$xcode_version.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -DFORCE_INSOURCE_BUILD=1 -DCOMPILATION_COMMENT=Homebrew -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DINSTALL_DOCDIR=share/doc/mysql-client -DINSTALL_INCLUDEDIR=include/mysql -DINSTALL_INFODIR=share/info -DINSTALL_MANDIR=share/man -DINSTALL_MYSQLSHAREDIR=share/mysql -DDOWNLOAD_BOOST=1 -DWITH_BOOST=boost -DWITH_EDITLINE=system -DWITH_FIDO=bundled -DWITH_LIBEVENT=system -DWITH_ZLIB=bundled -DWITH_SSL=yes -DWITH_UNIT_TESTS=OFF -DWITHOUT_SERVER=ON -DOPENSSL_ROOT_DIR=$src_dir/openssl-$openssl_release -DOPENSSL_INCLUDE_DIR=$src_dir/openssl-$openssl_release/include -DOPENSSL_LIBRARY=$src_dir/openssl-$openssl_release/libssl.1.1.dylib -DCRYPTO_LIBRARY=$src_dir/openssl-$openssl_release/libcrypto.1.1.dylib -DCMAKE_CXX_FLAGS='-mmacosx-version-min=$minosx'"
+        . " && make -j $nprocs"
+        . " && make install"
+        ;
+    my $res = run_cmd( $cmd, true );
+    error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
+}
+
+# install libarchive
+if ( $opts{libarchive}{set} || $opts{all}{set} ) {
+    print line('=');
+    print "build libarchive \n";
+    print line('=');
+    my $cmd = 
+        "xcodes select $xcode_version"
+        . " && cd $src_dir"
+        . " && wget -O $libarchive_file $libarchive_url"
+        . " && tar Jxf $libarchive_file"
+        . " && rm $libarchive_file"
+        . " && cd $libarchive_src"
+        . " && ./configure --prefix=$libarchive_dir  --without-libb2 --without-lz4 --without-lzma --without-zstd"
+        . " && sed '/^CFLAGS /s/\$/ -mmacosx-version-min=$minosx/' Makefile | sed '/^CPPFLAGS /s/\$/ -mmacosx-version-min=$minosx/' > tmp_makefile"
+        . " && mv tmp_makefile Makefile"
+        . " && make clean"
         . " && make -j $nprocs"
         . " && make install"
         ;
@@ -453,6 +483,11 @@ if ( $opts{us}{set} ) {
             $qwtsrcdir_sed =~ s/\//\\\//g;
             push @sedlines, "s/__qwtsrcdir__/$qwtsrcdir_sed/g";
         }
+        {
+            my $libarchivedir_sed = $libarchive_dir;
+            $libarchivedir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__libarchivedir__/$libarchivedir_sed/g";
+        }
         $sedline = join ';', @sedlines;
         if ( $debug >= 2 ) {
             print "---\n";
@@ -584,6 +619,11 @@ if ( $opts{us_update}{set} ) {
             my $qwtsrcdir_sed = $qwtsrcdir;
             $qwtsrcdir_sed =~ s/\//\\\//g;
             push @sedlines, "s/__qwtsrcdir__/$qwtsrcdir_sed/g";
+        }
+        {
+            my $libarchivedir_sed = $libarchive_dir;
+            $libarchivedir_sed =~ s/\//\\\//g;
+            push @sedlines, "s/__libarchivedir__/$libarchivedir_sed/g";
         }
         $sedline = join ';', @sedlines;
         if ( $debug >= 2 ) {
