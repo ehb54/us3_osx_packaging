@@ -92,9 +92,11 @@ for $f ( @all ) {
     }
 
     ## dylibs & frameworks 2nd otool -L line is self-reference, apparently can be ignored
+    ## 20241216 - test for self references and skip now performed later
     ### if not then special handling install_name_tool -id will be needed instead of -change
 
     my $deletelines = $f =~ /(dylib$|\.framework)/ ? "1,2d" : "1d";
+#    print "otool -L $f | sed $deletelines | awk '{ print \$1 }'\n";
     my @deps = `otool -L $f | sed $deletelines | awk '{ print \$1 }'`;
 
     grep chomp, @deps;
@@ -103,11 +105,19 @@ for $f ( @all ) {
 #    print '-'x80 . "\n";
 #    print "all item '$f'\n";
 #    print '-'x80 . "\n";
-    
+# end debug
+
     ## catagorize & store deps
     for my $d ( @deps ) {
 # debug 20240615
-#        print "checking dep $d\n";
+#        print "checking dep '$d' for allitem '$f' \n";
+# end debug
+        ## check for self reference & skip
+        if ( $d =~ /.*$f$/ ) {
+            ## debug 20241216
+            # print "skiping self-referential dep '$d' for allitem '$f' \n";
+            next;
+        }
         if ( $d =~ /^\/System\/Library\/Frameworks/ ) {
             $syslibs{ $d }++;
             next;
