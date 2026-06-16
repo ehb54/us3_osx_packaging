@@ -27,7 +27,8 @@ macx {
     INCLUDEPATH += ../../Frameworks/QtSvg.framework/Headers
     INCLUDEPATH += ../../Frameworks/QtXml.framework/Headers
     LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Libraries
-    LIBS        += -lssl -lcrypto -lqwtplot3d
+    LIBS        += -lssl -lcrypto
+    !equals(TARGET, qwtplot3d): LIBS += -lqwtplot3d
     LIBS        += -framework QtOpenGL
     LIBS        += -L__openssldir__
     LIBS        += -L/usr/X11R6/lib
