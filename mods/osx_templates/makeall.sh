@@ -45,9 +45,10 @@ fi
 DOMAN=1
 DODOX=1
 
-if [ -z "`which tpage`" ]; then
-  DOMAN=0
-fi
+# osx force manual
+#if [ -z "`which sphinx-build`" ]; then
+#  DOMAN=0
+#fi
 if [ -z "`which doxygen`" ]; then
   DODOX=0
 fi
@@ -94,6 +95,7 @@ if [ $DOMAN -ne 0 ]; then
   pushd $d
   sdir=`pwd`
   echo "Making in $d"   >> $DIR/build.log
+  pip3 install --user --break-system-packages -r source/requirements.txt
   make -j1 2>&1 >> $DIR/build.log
   stat=$?
   if [ $stat -gt 0 ]; then
