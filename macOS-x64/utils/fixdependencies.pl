@@ -41,6 +41,17 @@ $installerpath = `cd $scriptpath && pwd -P | perl -pe 's/\\/[^\\/]+\$//'`;
 
 %xquartzmap = map { $_ => 1 } @xquartz;
 
+## programs to exclude from the macOS package
+@excluded_progs = qw(
+    us_comproject
+    us_comproject_academic
+    us_protocoldev
+    us_reporter_gmp
+    us_audit_trail_gmp
+    us_esigner_gmp
+);
+my $excluded_re = join '|', map { quotemeta($_) . '(?:[.\\/]|$)' } @excluded_progs;
+
 ## get apps
 
 @apps = `find bin -type f`;
@@ -50,6 +61,7 @@ $installerpath = `cd $scriptpath && pwd -P | perl -pe 's/\\/[^\\/]+\$//'`;
 @apps = grep !/\.(lproj|plist)\s*$/, @apps;
 @apps = grep !/(PkgInfo|icns|\.DS_Store)$/, @apps;
 @apps = grep !/(win64|linux64|manual\.q)/, @apps;
+@apps = grep !/$excluded_re/, @apps if @excluded_progs;
 
 ## get libs
 
@@ -215,12 +227,18 @@ if ( keys %minos_count > 1 ) {
     $warnings .= "total programs found $count\n";
 }
 
-$revfile = "programs/us/us_revision.h";
+$revfile   = "programs/us/us_revision.h";
+$verfile   = "utils/us_defines.h";
 if ( !-e $revfile ) {
     $errorsum .= "ERROR: revision file $revfile is missing\n";
+} elsif ( !-e $verfile ) {
+    $errorsum .= "ERROR: version file $verfile is missing\n";
 } else {
-    $rev = `awk -F\\" '{ print \$2 }' $revfile`;
-    chomp $rev;
+    my $buildnum  = `awk -F'"' '/BUILDNUM/ { print \$2 }' $revfile`;
+    chomp $buildnum;
+    my $usversion = `awk -F'"' '/US_Version/ { print \$2 }' $verfile`;
+    chomp $usversion;
+    $rev = "$usversion-build-$buildnum";
 }
 
 ### begin reports
@@ -313,8 +331,13 @@ if ( $errorsum ) {
 
 if ( $rev && !keys %todos && !$errorsum && !$cmds ) {
     print hdrline( "build package commands" );
-    my $cmd = "$scriptpath/makepkgdir.pl $installerpath/application
-(cd $installerpath && yes n | ./build-macos-x64.sh UltraScan3 4.0.$rev && cp target/pkg/UltraScan3-macos-installer-x64-4.0.$rev.pkg ~/Downloads/UltraScan3-macos-installer-`uname -m`-4.0.$rev.pkg)";
+    my $stagedir = "$installerpath/application";
+    my $rmcmds = '';
+    for my $p ( @excluded_progs ) {
+        $rmcmds .= "rm -rf $stagedir/bin/$p.app $stagedir/bin/$p\n";
+    }
+    my $cmd = "$scriptpath/makepkgdir.pl $stagedir
+${rmcmds}(cd $installerpath && yes n | ./build-macos-x64.sh UltraScan3 $rev && cp target/pkg/UltraScan3-macos-installer-x64-$rev.pkg ~/Downloads/UltraScan3-macos-installer-`uname -m`-$rev.pkg)";
     print "$cmd\n";
 }
 
