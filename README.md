@@ -18,7 +18,7 @@ export XCODES_USERNAME='your-appleID'
 export XCODES_PASSWORD='your-appleID-password'
 ~/us3_osx_packaging/setup/setup.pl --all
 ~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
-cd ~/ultrascan-BRANCHNAME
+cd ~/ultrascan3-BRANCHNAME
 . qt5env
 ./makeall.sh
 ./makesomo.sh
@@ -45,7 +45,7 @@ xcodes install 14.3.1
 ~/us3_osx_packaging/setup/setup.pl --qt
 ~/us3_osx_packaging/setup/setup.pl --qwt
 ~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
-cd ~/ultrascan-BRANCHNAME
+cd ~/ultrascan3-BRANCHNAME
 . qt5env
 ./makeall.sh
 ./makesomo.sh
@@ -65,7 +65,7 @@ cd ~/ultrascan-BRANCHNAME
   - `git pull` 
 ### existing branch
 ```
-cd ~/ultrascan-BRANCHNAME
+cd ~/ultrascan3-BRANCHNAME
 git fetch origin
 git reset --hard origin/BRANCHNAME
 git pull
