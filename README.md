@@ -84,7 +84,7 @@ git pull
 ### new branch
 ```
 ~/us3_osx_packaging/setup/setup.pl --us BRANCHNAME
-cd ~/ultrascan-BRANCHNAME
+cd ~/ultrascan3-BRANCHNAME
 . qt5env
 ./makeall.sh
 ./makesomo.sh
