@@ -533,6 +533,7 @@ if ( $opts{us}{set} ) {
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        ,"cp -p $libarchive_dir/lib/libarchive.*.dylib $us_dir/lib"
         ,"cd $us_dir && $scriptdir/../macOS-x64/utils/fixframeworks.pl Frameworks/*.framework"
         );
         
@@ -561,6 +562,7 @@ if ( $opts{frameworks}{set} ) {
         ,"cp -p $src_dir/$openssl_dir/libssl.1.1.dylib $us_dir/lib"
         ,"cp -p $src_dir/$openssl_dir/libcrypto.1.1.dylib $us_dir/lib"        
         ,"cp -p $src_dir/mysql-client-$mysql_version/lib/libmysqlclient.*.dylib $us_dir/lib"
+        ,"cp -p $libarchive_dir/lib/libarchive.*.dylib $us_dir/lib"
         ,"cd $us_dir && $scriptdir/../macOS-x64/utils/fixframeworks.pl Frameworks/*.framework"
         );
         
