@@ -12,7 +12,8 @@ die $notes if !@ARGV;
 
 use File::Basename;
 
-$cmds .= "ln -sf ../lib Frameworks\n";
+## -h so reruns replace existing symlinks instead of creating links inside their targets
+$cmds .= "ln -sfh ../lib Frameworks/lib\n";
 print $cmds;
 print `$cmds`;
 
@@ -30,8 +31,8 @@ for my $a ( @ARGV ) {
     die "Error: $a/Contents/Frameworks is a directory\n" if -e "$a/Contents/Frameworks" && !-l "$a/Contents/Frameworks";
     die "Error: $a/Contents/platforms is a directory\n" if -e "$a/Contents/MacOS/platforms" && !-l "$a/Contents/MacOS/platforms";
 
-    $cmds .= "ln -sf ../../../Frameworks $a/Contents/\n";
-    $cmds .= "ln -sf ../../../../plugins/platforms $a/Contents/MacOS/platforms\n";
+    $cmds .= "ln -sfh ../../../Frameworks $a/Contents/Frameworks\n";
+    $cmds .= "ln -sfh ../../../../plugins/platforms $a/Contents/MacOS/platforms\n";
         
     ## otool analysis
 

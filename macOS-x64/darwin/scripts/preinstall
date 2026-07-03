@@ -1,21 +1,29 @@
 #!/bin/bash
 
-# Remove programs excluded from the UltraScan3 macOS package before installation
-# so that upgrading over a previous install does not leave stale excluded binaries.
+# Remove any previous installation before the new payload is written, so a
+# reinstall/upgrade leaves exactly the files of the new package and no strays
+# (e.g. frameworks, plugins or programs dropped from newer packages, which
+# could otherwise be picked up at runtime with incompatible versions).
+# This also covers programs excluded from the macOS package (@excluded_progs
+# in macOS-x64/utils/fixdependencies.pl), previously removed individually here.
+# The Distribution installation-check already warns the user about this.
 #
-# Keep this list in sync with @excluded_progs in macOS-x64/utils/fixdependencies.pl
+# UltraScan user data lives under the user's home directory and is not touched.
 
-PRODUCT_HOME="/Applications/__PRODUCT__"
+PRODUCT="__PRODUCT__"
+PRODUCT_HOME="/Applications/${PRODUCT}"
 
-for prog in \
-    us_comproject \
-    us_comproject_academic \
-    us_protocoldev \
-    us_reporter_gmp \
-    us_audit_trail_gmp \
-    us_esigner_gmp \
-; do
-    rm -rf "${PRODUCT_HOME}/bin/${prog}.app" "${PRODUCT_HOME}/bin/${prog}"
-done
+# refuse to run with an empty or path-altering product name
+case "${PRODUCT}" in
+    "" | . | .. | */* )
+        echo "preinstall: refusing to remove suspicious path '${PRODUCT_HOME}'" >&2
+        exit 1
+        ;;
+esac
+
+if [ -d "${PRODUCT_HOME}" ]; then
+    echo "preinstall: removing previous installation at ${PRODUCT_HOME}"
+    rm -rf "${PRODUCT_HOME}"
+fi
 
 exit 0
