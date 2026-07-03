@@ -139,10 +139,26 @@ copyBuildDirectory() {
 
 function buildPackage() {
     log_info "Application installer package building started.(1/3)"
+
+    # Force every bundle to be non-relocatable. pkgbuild marks .app bundles as
+    # relocatable by default; at install time PackageKit then redirects a bundle
+    # onto an existing copy of the same CFBundleIdentifier registered elsewhere
+    # (e.g. a developer's build tree) instead of installing it under the declared
+    # /Applications/${PRODUCT} path. This is a self-sustaining trap: once a bundle
+    # is missing from /Applications it relocates to a build-tree copy and never
+    # returns. Generate a component plist and flip every BundleIsRelocatable to
+    # false so bundles always install where intended. (ultrascan3's CMake
+    # packaging does the same in pkg/macos/component.plist.)
+    pkgbuild --analyze --root "${TARGET_DIRECTORY}/darwinpkg" \
+    "${TARGET_DIRECTORY}/component.plist" > /dev/null 2>&1
+    /usr/bin/perl -0777 -pi -e 's{(<key>BundleIsRelocatable</key>\s*)<true/>}{${1}<false/>}g' \
+    "${TARGET_DIRECTORY}/component.plist"
+
     pkgbuild --identifier "org.${PRODUCT}.${VERSION}" \
     --version "${VERSION}" \
     --scripts "${TARGET_DIRECTORY}/darwin/scripts" \
     --root "${TARGET_DIRECTORY}/darwinpkg" \
+    --component-plist "${TARGET_DIRECTORY}/component.plist" \
     "${TARGET_DIRECTORY}/package/${PRODUCT}.pkg" > /dev/null 2>&1
 }
 
