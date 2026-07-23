@@ -33,10 +33,9 @@ die "$minosprog not executable\n" if !-x $minosprog;
 
 $installerpath = `cd $scriptpath && pwd -P | perl -pe 's/\\/[^\\/]+\$//'`;
 
-## exclude XQuartz software for lib check errors
+## no XQuartz-dependent binaries to exclude (rasmol is now statically SDL3-linked, no X11)
 @xquartz =
     (
-     "bin/rasmol"
     );
 
 %xquartzmap = map { $_ => 1 } @xquartz;
@@ -204,6 +203,7 @@ for $f ( @all ) {
     "bin/Assistant.app"
     ,"bin/us3_somo.app"
     ,"bin/rasmol"
+    ,"bin/rasmol.hlp"
     ,"bin/manual.qch"
     ,"Frameworks"
     ,"plugins"
