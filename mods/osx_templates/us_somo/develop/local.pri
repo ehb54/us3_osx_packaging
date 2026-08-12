@@ -120,14 +120,11 @@ message( "macx" );
   DEFINES     += MAC OSX
   INCLUDEPATH += /System/Libraries/Frameworks/OpenGL.framework/Headers
   INCLUDEPATH += $QTPATH/include
-  INCLUDEPATH += /usr/X11R6/include
-  INCLUDEPATH += /usr/X11R6/include/GL
   LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Libraries
 #  LIBS        += -L$$US3PATH/lib
 #  LIBS        += -l$$QWT3DLIBNAME
   LIBS        += -framework QtOpenGL
   LIBS        += $$QWTPATH/lib/qwt.framework/qwt
-#  X11LIB       = -L/usr/X11R6/lib -lXau -lX11
 #   QMAKE_LFLAGS += -dynamiclib
 }
 

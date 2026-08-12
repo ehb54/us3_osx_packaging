@@ -23,14 +23,6 @@ function installCheck() {
         my.result.type = 'Fatal';
         return false;
     }
-    if( !system.files.fileExistsAtPath("/usr/X11/lib/libX11.6.dylib") ||
-        !system.files.fileExistsAtPath("/usr/X11/lib/libXext.6.dylib") ||
-        !system.files.fileExistsAtPath("/usr/X11/lib/libXi.6.dylib") ) {
-        my.result.title = 'Unable to install - XQuartz must be installed first';
-        my.result.message = 'You must install XQuartz before proceeding. The XQuartz package can be downloaded from https://xquartz.org';
-        my.result.type = 'Fatal';
-        return false;
-    }
     if(system.files.fileExistsAtPath('/Applications/__PRODUCT__/')) {
         my.result.title = 'Previous Installation Detected';
         my.result.message = 'A previous installation of __PRODUCT__ exists at /Applications/__PRODUCT__/. This installer will remove the previous installation prior to installing. Please back up any data before proceeding.';
