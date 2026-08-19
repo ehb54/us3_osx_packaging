@@ -18,4 +18,13 @@ for prog in \
     rm -rf "${PRODUCT_HOME}/bin/${prog}.app" "${PRODUCT_HOME}/bin/${prog}"
 done
 
+# Remove the Windows and Linux GRPY/iftci binaries left behind by installs made
+# before they were excluded from the package. The installer overlays the
+# previous install rather than replacing it, so stale copies would otherwise
+# survive an upgrade.
+#
+# Keep these patterns in sync with @excludes in macOS-x64/utils/makepkgdir.pl
+
+rm -f "${PRODUCT_HOME}"/bin/*_win64.exe "${PRODUCT_HOME}"/bin/*_linux64
+
 exit 0

@@ -33,6 +33,24 @@ die "bad directory $tdir must contain '$reqformat'\n" if $tdir !~ /$reqformat/;
     "LICENSE.txt"
     );
 
+## patterns kept out of the package.
+##
+## GRPY and iftci ship in the source tree built for all three platforms, but a
+## macOS build can only ever reference the _osx* variants: the suffix is chosen
+## at compile time from Q_OS_MAC in us_somo/develop/src/us_container_grpy.cpp
+## and us_somo/develop/src/us_hydrodyn_saxs_external.cpp, so the Windows and
+## Linux copies are dead weight in a macOS package.
+##
+## Keep in sync with the non-macOS cleanup in
+## macOS-x64/darwin/scripts/preinstall.
+
+@excludes = (
+    "*_win64.exe"
+    ,"*_linux64"
+    );
+
+$excludeopts = join ' ', map { "--exclude='$_'" } @excludes;
+
 @postcmds = (
 ## some bug in package builder... this seems to fix it
 ## not since I added assistant?    "cd $tdir/bin && cp -r us.app us3.app"
@@ -63,7 +81,7 @@ for $f ( @files ) {
 $cmds = '';
 
 for $l ( @dirs ) {
-    $cmds .= "mkdir -p $tdir/$l && rsync -av $l/* $tdir/$l/\n";
+    $cmds .= "mkdir -p $tdir/$l && rsync -av $excludeopts $l/* $tdir/$l/\n";
 }
 
 for $f ( @files ) {
