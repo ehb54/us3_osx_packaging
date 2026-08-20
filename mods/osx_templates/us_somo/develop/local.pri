@@ -120,7 +120,10 @@ message( "macx" );
   DEFINES     += MAC OSX
   INCLUDEPATH += /System/Libraries/Frameworks/OpenGL.framework/Headers
   INCLUDEPATH += $QTPATH/include
-  LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Libraries
+  # libGLU lives under Versions/A/Libraries: the framework carries no
+  # top-level Libraries symlink, so the shorter path never resolved and
+  # XQuartz's /usr/X11R6/lib was silently satisfying gui.pri's -lGLU.
+  LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries
 #  LIBS        += -L$$US3PATH/lib
 #  LIBS        += -l$$QWT3DLIBNAME
   LIBS        += -framework QtOpenGL
