@@ -51,6 +51,9 @@ $xquartz_url            = "https://github.com/XQuartz/XQuartz/releases/download/
 $xcode_version          = "13.4.1"; ## previously 12.5.1
 # $xcode_sdk_version      = "12.3";    ## previously 11.3
 $xcode_version_for_cpan = "14.3.1"; ## could be determined from perl version and a lookup hash
+## the selected Xcode's own SDK: with no SDK named, its compiler can default to the
+## Command Line Tools SDK, which can be too new for it (macOS 27's is, for Xcode 13.4.1)
+$xcode_sdk              = "/Applications/Xcode-$xcode_version.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
 
 $zstd_release           = "v1.5.6";
 $zstd_git               = "https://github.com/facebook/zstd.git";
@@ -244,6 +247,7 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
     }
     my $cmd = 
         "xcodes select $xcode_version"
+        . " && export SDKROOT=$xcode_sdk"
         . " && cd $src_dir"
         . " && git clone -j $cprocs $zstd_git zstd-$zstd_release"
         . " && cd zstd-$zstd_release"
@@ -264,6 +268,7 @@ if ( $opts{openssl}{set} || $opts{all}{set} ) {
     print line('=');
     my $cmd = 
         "xcodes select $xcode_version"
+        . " && export SDKROOT=$xcode_sdk"
         . " && cd $src_dir"
         . " && wget -O $openssl_dir.tar.gz $openssl_url"
         . " && tar zxf $openssl_dir.tar.gz"
@@ -305,6 +310,7 @@ if ( $opts{libarchive}{set} || $opts{all}{set} ) {
     print line('=');
     my $cmd = 
         "xcodes select $xcode_version"
+        . " && export SDKROOT=$xcode_sdk"
         . " && cd $src_dir"
         . " && wget -O $libarchive_file $libarchive_url"
         . " && tar Jxf $libarchive_file"
