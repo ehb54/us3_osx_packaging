@@ -95,7 +95,13 @@ if [ $DOMAN -ne 0 ]; then
   pushd $d
   sdir=`pwd`
   echo "Making in $d"   >> $DIR/build.log
-  pip3 install --user --break-system-packages -r source/requirements.txt
+  ## --break-system-packages exists only in pip 23.0.1+; pip3 on an externally managed
+  ## Python (e.g. Homebrew's) requires it, and older pip3 (e.g. Xcode 13.4.1's) rejects it
+  BSP=""
+  if pip3 install --help 2>/dev/null | grep -q -- --break-system-packages; then
+    BSP="--break-system-packages"
+  fi
+  pip3 install --user $BSP -r source/requirements.txt
   make -j1 2>&1 >> $DIR/build.log
   stat=$?
   if [ $stat -gt 0 ]; then
