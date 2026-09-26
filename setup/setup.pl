@@ -232,6 +232,16 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
     print line('=');
     print "build zstd\n";
     print line('=');
+    ## make install puts zstd in /usr/local, which is not writable on a fresh Apple Silicon Mac
+    ## (on Intel Macs, Homebrew makes its subdirectories writable), so use sudo when needed
+    my $sudo = "";
+    for my $d ( "bin", "include", "lib", "share" ) {
+        my $dir = -d "/usr/local/$d" ? "/usr/local/$d" : "/usr/local";
+        if ( !-w $dir ) {
+            $sudo = "sudo ";
+            last;
+        }
+    }
     my $cmd = 
         "xcodes select $xcode_version"
         . " && cd $src_dir"
@@ -241,7 +251,7 @@ if ( $opts{zstd}{set} || $opts{all}{set} ) {
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' Makefile"
         . " && sed -i '' '14s/^/CFLAGS   += -mmacosx-version-min=$minosx\\nCPPFLAGS += -mmacosx-version-min=$minosx\\n/' lib/Makefile"
         . " && make -j $nprocs"
-        . " && make install" 
+        . " && ${sudo}make install"
         ;
     my $res = run_cmd( $cmd, true );
     error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
