@@ -34,6 +34,15 @@ if ( $arch eq "arm64" ) {
     $postgress_install_location = '/usr/local/opt/postgresql@14';
 }
 
+$macos_version = `sw_vers -productVersion`;
+chomp $macos_version;
+( $macos_major ) = $macos_version =~ /^(\d+)/;
+
+## xcodes: homebrew-core's formula needs macOS 15 or later (bottled for arm64)
+## the xcodesorg/made tap builds from source, which fails with Xcode 27 / Command Line Tools 27
+## https://github.com/XcodesOrg/homebrew-made/issues/4
+$xcodes_pkg = $macos_major >= 15 ? "xcodes" : "xcodesorg/made/xcodes";
+
 ## these versions can be a moving target
 
 $xquartz_release        = "XQuartz-2.8.2";
@@ -133,7 +142,7 @@ if ( $opts{procs}{set} ) {
     ,"nodejs"
     ,"cmake"
     ,"aria2"
-    ,"xcodesorg/made/xcodes"
+    ,$xcodes_pkg
     ,"llvm"
     ,"pkg-config"
     ,"cpanminus"
@@ -171,6 +180,14 @@ if ( $opts{brewpackages}{set} || $opts{all}{set} ) {
         $cmd .= $p;
 
         print line();
+        if ( $p eq $xcodes_pkg ) {
+            ## brew will not install xcodes over a copy installed from the other tap
+            my $installed = run_cmd( "brew list --formula --versions xcodes", true );
+            if ( !run_cmd_last_error() ) {
+                print "$installed already installed, skipping\n";
+                next;
+            }
+        }
         my $res = run_cmd( $cmd, true );
         print "$res\n";
         error_exit( sprintf( "ERROR: failed [%d] $cmd", run_cmd_last_error() ) ) if run_cmd_last_error();
