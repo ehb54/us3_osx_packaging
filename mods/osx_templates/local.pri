@@ -14,7 +14,6 @@ macx {
     INCLUDEPATH += $$QWTPATH/src
     INCLUDEPATH += ../qwtplot3d/include
     INCLUDEPATH += ../../qwtplot3d/include
-    INCLUDEPATH += /usr/X11R6/include
     INCLUDEPATH += __openssldir__/include
     INCLUDEPATH += ../Frameworks/QtCore.framework/Headers
     INCLUDEPATH += ../Frameworks/QtGui.framework/Headers
@@ -26,17 +25,18 @@ macx {
     INCLUDEPATH += ../../Frameworks/QtOpenGL.framework/Headers
     INCLUDEPATH += ../../Frameworks/QtSvg.framework/Headers
     INCLUDEPATH += ../../Frameworks/QtXml.framework/Headers
-    LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Libraries
+    # libGLU lives under Versions/A/Libraries: the framework carries no
+    # top-level Libraries symlink, so the shorter path never resolved and
+    # XQuartz's /usr/X11R6/lib was silently satisfying gui.pri's -lGLU.
+    LIBS        += -L/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries
     LIBS        += -lssl -lcrypto
     !equals(TARGET, qwtplot3d): LIBS += -lqwtplot3d
     LIBS        += -framework QtOpenGL
     LIBS        += -L__openssldir__
-    LIBS        += -L/usr/X11R6/lib
     LIBS        += $$QWTPATH/lib/qwt.framework/qwt
     MYSQLPATH   = __mysqldir__
     INCLUDEPATH += $$MYSQLPATH/include
     MYSQLDIR    = $$MYSQLPATH/lib
-    X11LIB      = -L/usr/X11R6/lib -lXau -lX11
     INCLUDEPATH += __libarchivedir__/include
     LIBS        += -L__libarchivedir__/lib -larchive
 }

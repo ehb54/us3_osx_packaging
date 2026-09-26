@@ -33,13 +33,6 @@ die "$minosprog not executable\n" if !-x $minosprog;
 
 $installerpath = `cd $scriptpath && pwd -P | perl -pe 's/\\/[^\\/]+\$//'`;
 
-## no XQuartz-dependent binaries to exclude (rasmol is now statically SDL3-linked, no X11)
-@xquartz =
-    (
-    );
-
-%xquartzmap = map { $_ => 1 } @xquartz;
-
 ## programs to exclude from the macOS package
 @excluded_progs = qw(
     us_comproject
@@ -166,11 +159,6 @@ for $f ( @all ) {
             next;
         }
 
-        if ( $xquartzmap{ $f } ) {
-            $xquartzexcludes{ "$f : $d" }++;
-            next;
-        }
-
         if ( $d =~ /\/.framework/ ) {
             my $checkfile = basename( $d );
             $checkfile = "Frameworks/$checkfile";
@@ -266,10 +254,6 @@ print "\n";
 print hdrline( "ignores" );
 print join "\n", sort { $a cmp $b } keys %ignores;
 print "\n" if keys %ignores;
-
-print hdrline( "xquartz excludes" );
-print join "\n", sort { $a cmp $b } keys %xquartzexcludes;
-print "\n" if keys %xquartzexcludes;
 
 print hdrline( "minimum os version counts" );
 for $d ( sort { $a cmp $b } keys %minos_count ) {

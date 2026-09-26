@@ -33,7 +33,6 @@ cd ~/ultrascan3-BRANCHNAME
 ```
 ~/us3_osx_packaging/setup/setup.pl --brew
 ~/us3_osx_packaging/setup/setup.pl --brewpackages
-~/us3_osx_packaging/setup/setup.pl --xquartz
 xcodes install 13.4.1
 xcodes install 14.3.1
 ~/us3_osx_packaging/setup/setup.pl --zstd
