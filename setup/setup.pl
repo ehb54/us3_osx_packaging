@@ -394,7 +394,7 @@ if ( $opts{qt}{set} || $opts{all}{set} ) {
 
     ## configure qt
 
-    $cmd = "cd $qtshadow && export MAKEFLAGS=-j$nprocs && ../configure -prefix $src_dir/qt-$qt_major_version.$qt_minor_version -release -opensource -confirm-license -nomake tests -nomake examples -plugin-sql-mysql -plugin-sql-psql -openssl-linked -system-proxies -D QT_SHAREDMEMORY -D QT_SYSTEMSEMAPHORE -no-icu OPENSSL_PREFIX=$src_dir/openssl MYSQL_INCDIR=$src_dir/mysql-$mysql_version/include MYSQL_PREFIX=$src_dir/mysql-$mysql_version PSQL_PREFIX=$postgresql_install_location  > ../last_configure.stdout 2> ../last_configure.stderr";
+    $cmd = "cd $qtshadow && export MAKEFLAGS=-j$nprocs && ../configure -prefix $src_dir/qt-$qt_major_version.$qt_minor_version -release -opensource -confirm-license -nomake tests -nomake examples -skip qtwebengine -plugin-sql-mysql -plugin-sql-psql -openssl-linked -system-proxies -D QT_SHAREDMEMORY -D QT_SYSTEMSEMAPHORE -no-icu OPENSSL_PREFIX=$src_dir/openssl MYSQL_INCDIR=$src_dir/mysql-$mysql_version/include MYSQL_PREFIX=$src_dir/mysql-$mysql_version PSQL_PREFIX=$postgresql_install_location  > ../last_configure.stdout 2> ../last_configure.stderr";
 
     print run_cmd( $cmd );
 
