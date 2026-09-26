@@ -3,7 +3,7 @@
 ## user configuration
 
 $qt_major_version = "5.15";
-$qt_minor_version = "14";
+$qt_minor_version = "19";
 $qwt_version      = "6.3.0";
 $src_dir          = "$ENV{HOME}/src";  ## where qt qwt etc will be compiled
 $nprocs           = `sysctl -n hw.ncpu` + 1;
