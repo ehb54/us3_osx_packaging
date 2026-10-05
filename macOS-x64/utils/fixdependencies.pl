@@ -145,7 +145,8 @@ for $f ( @all ) {
             $checkfile =~ s/^\@rpath\/(\.\.\/)*//;
             if ( $checkfile =~ /\.framework/ ) {
                 $checkfile = "Frameworks/$checkfile" if $checkfile !~ /^Frameworks\//;
-            } elsif ( $checkfile != /^lib\// ) {
+            } elsif ( $checkfile !~ /^lib\// ) {
+                ## e.g. a CMake build's @rpath/libus_somo.10.dylib, before fixapps.pl
                 $checkfile = "lib/$checkfile";
             }
             

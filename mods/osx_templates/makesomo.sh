@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# usage: makesomo.sh [--qmake | --cmake] [make options]
+#   --qmake  build SOMO with qmake (the default)
+#   --cmake  build SOMO with CMake (cmake --preset qt5); needs an ultrascan3
+#            tree with SOMO's CMake build (us_somo/develop/CMakePresets.json)
+BUILDSYS=qmake
+case "$1" in
+  --qmake) BUILDSYS=qmake; shift ;;
+  --cmake) BUILDSYS=cmake; shift ;;
+esac
+
 MKARGS="$@"
 if [ $# -eq 0 ]; then
   MKARGS="-j __nprocs__"
@@ -100,13 +110,28 @@ echo "rsync -av --exclude .svn $SOMO3/etc $ULTRASCAN"
 rsync -av --exclude .svn $SOMO3/etc $ULTRASCAN
 
 cd $SOMO3/develop
-sh version.sh
-qmake us_somo.pro
-cp -p Makefile  Makefile-all
-qmake libus_somo.pro
-cp -p Makefile  Makefile-lib
-${MAKE} -f Makefile-lib
-${MAKE} -f Makefile-all
+if [ "$BUILDSYS" = "cmake" ]; then
+  if [ ! -f CMakePresets.json ]; then
+    echo "Error: $SOMO3/develop has no CMakePresets.json, so this tree cannot build SOMO with CMake; use qmake"
+    exit -1
+  fi
+  cmake --preset qt5 || exit -1
+  # MAKE (exported above for qmake's makefiles) and MAKEFLAGS (set by qt5env)
+  # would force -j into every sub-make, so make gets the options only here
+  ( unset MAKE MAKEFLAGS; cmake --build --preset qt5 -- ${MKARGS} ) || exit -1
+  # the build is in build/qt5: put the programs and the library where qmake does
+  mkdir -p $SOMO3/bin $SOMO3/lib
+  rsync -a build/qt5/bin/ $SOMO3/bin/
+  rsync -a build/qt5/lib/ $SOMO3/lib/
+else
+  sh version.sh
+  qmake us_somo.pro
+  cp -p Makefile  Makefile-all
+  qmake libus_somo.pro
+  cp -p Makefile  Makefile-lib
+  ${MAKE} -f Makefile-lib
+  ${MAKE} -f Makefile-all
+fi
 cd $SOMO3
 
 #if [ $ISMAC -ne 0 ]; then

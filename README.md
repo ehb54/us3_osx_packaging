@@ -96,6 +96,16 @@ cd ~/ultrascan3-BRANCHNAME
 ```
    - if all goes well, your package will be in `~/Downloads`
 
+## building SOMO with CMake (optional)
+
+qmake is still the default. An ultrascan3 branch that has SOMO's CMake build
+(`us_somo/develop/CMakePresets.json`, from ehb54/ultrascan3#579 on) can build
+SOMO with CMake instead: in the steps above, run `./makesomo.sh --cmake` in
+place of `./makesomo.sh`. The CMake build puts the programs and the library
+where the qmake build does, so the `fixdependencies.pl`, `fixapps.pl` and
+`fixlibs.pl` steps that follow stay the same. cmake comes with
+`setup.pl --brewpackages`.
+
 ## notes
 
 
