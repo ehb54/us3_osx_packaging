@@ -171,7 +171,7 @@ echo rsync -av --exclude .svn $SOMO3/etc/ $ULTRASCAN/etc
 rsync -av --exclude .svn $SOMO3/etc/ $ULTRASCAN/etc
 echo rsync -av --exclude .svn $SOMO3/somo/ $ULTRASCAN/somo/
 rsync -av --exclude .svn $SOMO3/somo/ $ULTRASCAN/somo/
-echo cd $ULTRASCAN/somo && rm -fr arc  *.pl *.sh *.txt test
+echo "cd $ULTRASCAN/somo && rm -fr arc  *.pl *.sh *.txt test"
 cd $ULTRASCAN/somo && rm -fr arc  *.pl *.sh *.txt test
 echo ""
 cd $ULTRASCAN
