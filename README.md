@@ -24,6 +24,9 @@ cd ~/ultrascan3-BRANCHNAME
 ./makesomo.sh
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl update
 ## repeat the above step until no "cmds" are reported
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prunelist
+## review the report, then move unreferenced Frameworks/libs/plugins into ./pruned
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prune
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
@@ -50,6 +53,9 @@ cd ~/ultrascan3-BRANCHNAME
 ./makesomo.sh
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl update
 ## repeat the above step until no "cmds" are reported
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prunelist
+## review the report, then move unreferenced Frameworks/libs/plugins into ./pruned
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prune
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
@@ -74,6 +80,9 @@ git pull
 ./makesomo.sh
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl update
 ## repeat the above step until no "cmds" are reported
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prunelist
+## review the report, then move unreferenced Frameworks/libs/plugins into ./pruned
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prune
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
@@ -89,6 +98,9 @@ cd ~/ultrascan3-BRANCHNAME
 ./makesomo.sh
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl update
 ## repeat the above step until no "cmds" are reported
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prunelist
+## review the report, then move unreferenced Frameworks/libs/plugins into ./pruned
+~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl prune
 ~/us3_osx_packaging/macOS-x64/utils/fixapps.pl bin/*.app
 ~/us3_osx_packaging/macOS-x64/utils/fixlibs.pl lib/*.dylib
 ~/us3_osx_packaging/macOS-x64/utils/fixdependencies.pl list
